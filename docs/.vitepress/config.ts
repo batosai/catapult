@@ -10,18 +10,20 @@ export default defineConfig({
       { text: 'Guide', link: '/guide/getting-started' },
     ],
 
-    sidebar: [
-      {
-        text: 'Guide',
-        items: [
-          { text: 'Getting Started', link: '/guide/getting-started' },
-          { text: 'Pipeline', link: '/guide/pipeline' },
-          { text: 'Recipes', link: '/guide/recipes' },
-          { text: 'Creating a Recipe', link: '/guide/creating-recipes' },
-          { text: 'Hooks', link: '/guide/hooks' },
-        ],
-      },
-    ],
+    sidebar: {
+      '/guide/': [
+        {
+          text: 'Guide',
+          items: [
+            { text: 'Getting Started', link: '/guide/getting-started' },
+            { text: 'Pipeline', link: '/guide/pipeline' },
+            { text: 'Recipes', link: '/guide/recipes' },
+            { text: 'Creating a Recipe', link: '/guide/creating-recipes' },
+            { text: 'Hooks', link: '/guide/hooks' },
+          ],
+        },
+      ],
+    },
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/batosai/catapult' }],
   },
