@@ -1,4 +1,4 @@
-#!/usr/bin/env node --import ./build/bin/bootstrap.js
+#!/usr/bin/env node
 
 import { existsSync } from 'fs'
 import { resolve } from 'path'

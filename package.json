@@ -2,7 +2,7 @@
   "name": "@jrmc/catapult",
   "version": "0.0.1-alpha.9",
   "type": "module",
-  "main": "index.js",
+  "main": "build/index.js",
   "bin": {
     "cata": "./build/bin/run.js",
     "catapult": "./build/bin/run.js"
