@@ -70,6 +70,9 @@
     "access": "public",
     "tag": "alpha"
   },
+  "engines": {
+    "node": ">=24.0.0"
+  },
   "volta": {
     "node": "24.13.0"
   }
