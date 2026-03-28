@@ -37,9 +37,16 @@
     "rsync",
     "cli"
   ],
+  "types": "./build/index.d.ts",
   "exports": {
-    ".": "./build/index.js",
-    "./recipes/*": "./build/recipes/*.js"
+    ".": {
+      "types": "./build/index.d.ts",
+      "import": "./build/index.js"
+    },
+    "./recipes/*": {
+      "types": "./build/recipes/*.d.ts",
+      "import": "./build/recipes/*.js"
+    }
   },
   "devDependencies": {
     "@adonisjs/eslint-config": "^3.0.0",
