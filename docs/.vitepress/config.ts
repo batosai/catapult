@@ -4,6 +4,16 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   title: 'Catapult',
   description: 'SSH deployment tool for Node.js applications.',
+  head: [
+    [
+      'script',
+      {
+        'defer': '',
+        'src': 'https://umami.jrmc.dev/script.js',
+        'data-website-id': 'e3910dee-0a06-45bd-87f7-90623acdcd7c',
+      },
+    ],
+  ],
   base: '/catapult/',
   themeConfig: {
     nav: [
