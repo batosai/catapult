@@ -14,7 +14,13 @@ ctp deploy
 
 ## Usage
 
-Create a `deploy.ts` file at the root of your project:
+Generate a `deploy.ts` file at the root of your project:
+
+```bash
+ctp init
+```
+
+Or create it manually:
 
 ```typescript
 import { defineConfig } from '@jrmc/catapult'
@@ -52,6 +58,9 @@ await defineConfig({
 ## Commands
 
 ```bash
+# Create a deploy.ts configuration file
+ctp init
+
 # Deploy
 ctp deploy
 

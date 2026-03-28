@@ -93,6 +93,13 @@
         <div class="step">
           <div class="step__number">2</div>
           <div class="step__content">
+            <h4>Init</h4>
+            <pre><code>ctp init</code></pre>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step__number">3</div>
+          <div class="step__content">
             <h4>Configure</h4>
             <pre><code><span class="c-keyword">import</span> { defineConfig } <span class="c-keyword">from</span> <span class="c-string">'@jrmc/catapult'</span>
 
@@ -108,7 +115,7 @@
           </div>
         </div>
         <div class="step">
-          <div class="step__number">3</div>
+          <div class="step__number">4</div>
           <div class="step__content">
             <h4>Deploy</h4>
             <pre><code>ctp deploy</code></pre>

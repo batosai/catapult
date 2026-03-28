@@ -4,6 +4,7 @@ import { existsSync } from 'fs'
 import { resolve } from 'path'
 import { pathToFileURL } from 'url'
 import { Kernel, ListLoader, HelpCommand } from '@adonisjs/ace'
+import Init from '../commands/init.js'
 import Setup from '../commands/setup.js'
 import Deploy from '../commands/deploy.js'
 import Rollback from '../commands/rollback.js'
@@ -12,15 +13,19 @@ import ListReleases from '../commands/list_releases.js'
 import ListTasks from '../commands/list_tasks.js'
 import RunTask from '../commands/run_task.js'
 
-const candidates = ['deploy.ts', 'deploy.js', 'bin/deploy.ts', 'bin/deploy.js']
-const deployFile = candidates.map((f) => resolve(process.cwd(), f)).find(existsSync)
+const isInit = process.argv[2] === 'init'
 
-if (!deployFile) {
-  console.error('No deploy.ts or deploy.js found in current directory')
-  process.exit(1)
+if (!isInit) {
+  const candidates = ['deploy.ts', 'deploy.js', 'bin/deploy.ts', 'bin/deploy.js']
+  const deployFile = candidates.map((f) => resolve(process.cwd(), f)).find(existsSync)
+
+  if (!deployFile) {
+    console.error('No deploy.ts or deploy.js found in current directory. Run `ctp init` to create one.')
+    process.exit(1)
+  }
+
+  await import(pathToFileURL(deployFile).href)
 }
-
-await import(pathToFileURL(deployFile).href)
 
 //
 
@@ -72,7 +77,7 @@ kernel.on('ansi', async (_, $kernel, parsed) => {
  * Using the List loader to register our command
  */
 kernel.addLoader(
-  new ListLoader([Setup, Deploy, Rollback, Status, ListReleases, ListTasks, RunTask])
+  new ListLoader([Init, Setup, Deploy, Rollback, Status, ListReleases, ListTasks, RunTask])
 )
 
 /**
