@@ -1,6 +1,7 @@
 import { BaseCommand } from '@adonisjs/ace'
 import { access, writeFile } from 'fs/promises'
 import { resolve } from 'path'
+import { execa } from 'execa'
 
 const TEMPLATE = `import { defineConfig } from '@jrmc/catapult'
 
@@ -33,5 +34,9 @@ export default class Init extends BaseCommand {
 
     await writeFile(dest, TEMPLATE)
     this.logger.action('create deploy.ts').succeeded()
+
+    this.logger.info('Installing @jrmc/catapult...')
+    await execa('npm', ['install', '@jrmc/catapult'], { cwd: process.cwd(), stdio: 'inherit' })
+    this.logger.action('install @jrmc/catapult').succeeded()
   }
 }
