@@ -82,12 +82,11 @@ task('deploy:publish', () => {
 task('deploy:log', async () => {
   const { host, deployCtx } = getContext()
 
-  let branch = 'unknown'
+  const branch = typeof host.branch === 'object' ? host.branch.name : (host.branch ?? 'unknown')
   let commit = 'unknown'
   let user = 'unknown'
 
   try {
-    branch = (await $`git rev-parse --abbrev-ref HEAD`).stdout.trim()
     commit = (await $`git rev-parse HEAD`).stdout.trim()
     user = (await $`git config user.name`).stdout.trim()
   } catch {}
