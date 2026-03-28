@@ -24,7 +24,7 @@ import './recipes/my-recipe'
 
 ## Setup hook
 
-Use `onSetup()` to run server-side initialization during `ctp deploy:setup` (e.g. create shared directories):
+Use `onSetup()` to run server-side initialization during `cata deploy:setup` (e.g. create shared directories):
 
 ```typescript
 import { onSetup } from '@jrmc/catapult'

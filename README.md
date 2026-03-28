@@ -11,8 +11,8 @@ npm install @jrmc/catapult
 ## Quick start
 
 ```bash
-ctp init    # create deploy.ts
-ctp deploy  # deploy
+cata init    # create deploy.ts
+cata deploy  # deploy
 ```
 
 ## Documentation

@@ -6,10 +6,10 @@
 npm install @jrmc/catapult
 ```
 
-Once installed, the `ctp` CLI is available:
+Once installed, the `cata` CLI is available:
 
 ```bash
-ctp deploy
+cata deploy
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ ctp deploy
 Generate a `deploy.ts` file at the root of your project:
 
 ```bash
-ctp init
+cata init
 ```
 
 Or create it manually:
@@ -59,36 +59,36 @@ await defineConfig({
 
 ```bash
 # Create a deploy.ts configuration file
-ctp init
+cata init
 
 # Deploy
-ctp deploy
+cata deploy
 
 # Initial server setup (create directories)
-ctp deploy:setup
+cata deploy:setup
 
 # Rollback to the previous release
-ctp rollback
+cata rollback
 
 # Server status
-ctp status
+cata status
 
 # List releases
-ctp list:releases
+cata list:releases
 
 # List registered tasks and the current pipeline
-ctp list:tasks
+cata list:tasks
 
 # Run a specific task on servers
-ctp task <task-name>
+cata task <task-name>
 
 # Target a specific host
-ctp deploy --host staging
+cata deploy --host staging
 ```
 
 ## Server structure
 
-After `ctp deploy:setup`, the server will have the following structure:
+After `cata deploy:setup`, the server will have the following structure:
 
 ```
 /base/
@@ -129,7 +129,7 @@ hosts: [
 Deployment runs sequentially on each host. To target a single host:
 
 ```bash
-ctp deploy --host staging
+cata deploy --host staging
 ```
 
 ## Automatic rollback

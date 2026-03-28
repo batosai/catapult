@@ -20,7 +20,7 @@ if (!isInit) {
   const deployFile = candidates.map((f) => resolve(process.cwd(), f)).find(existsSync)
 
   if (!deployFile) {
-    console.error('No deploy.ts or deploy.js found in current directory. Run `ctp init` to create one.')
+    console.error('No deploy.ts or deploy.js found in current directory. Run `cata init` to create one.')
     process.exit(1)
   }
 

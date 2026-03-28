@@ -120,8 +120,8 @@ after('deploy:healthcheck', 'notify')
 Any registered task — whether built-in, added by a recipe, or defined in `deploy.ts` — can be run directly from the terminal.
 
 ```bash
-ctp task adonisjs:migrate
-ctp task cache:clear --host staging
+cata task adonisjs:migrate
+cata task cache:clear --host staging
 ```
 
 ## Template variables

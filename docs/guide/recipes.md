@@ -30,8 +30,8 @@ import '@jrmc/catapult/recipes/pm2'
 | `pm2:restart` | Restarts applications                    |
 
 ```bash
-ctp task pm2:logs
-ctp task pm2:list --host staging
+cata task pm2:logs
+cata task pm2:list --host staging
 ```
 
 ## `recipes/rsync`
