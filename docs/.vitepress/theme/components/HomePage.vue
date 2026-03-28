@@ -1,3 +1,7 @@
+<script setup>
+import { withBase } from 'vitepress'
+</script>
+
 <template>
   <div class="home ctp-home">
     <!-- Hero -->
@@ -13,7 +17,7 @@
           Simple pipeline, zero server dependencies.
         </p>
         <div class="hero__actions">
-          <a href="/guide/getting-started" class="btn btn--primary">Get Started</a>
+          <a :href="withBase('/guide/getting-started')" class="btn btn--primary">Get Started</a>
           <a href="https://github.com/batosai/catapult" class="btn btn--secondary" target="_blank">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
               <path
@@ -24,7 +28,7 @@
           </a>
         </div>
         <div class="hero__install">
-          <code>npm install @jrmc/catapult</code>
+          <code>npx @jrmc/catapult init</code>
         </div>
       </div>
     </section>
@@ -86,19 +90,12 @@
         <div class="step">
           <div class="step__number">1</div>
           <div class="step__content">
-            <h4>Install</h4>
-            <pre><code>npm install @jrmc/catapult</code></pre>
+            <h4>Init</h4>
+            <pre><code>npx @jrmc/catapult init</code></pre>
           </div>
         </div>
         <div class="step">
           <div class="step__number">2</div>
-          <div class="step__content">
-            <h4>Init</h4>
-            <pre><code>cata init</code></pre>
-          </div>
-        </div>
-        <div class="step">
-          <div class="step__number">3</div>
           <div class="step__content">
             <h4>Configure</h4>
             <pre><code><span class="c-keyword">import</span> { defineConfig } <span class="c-keyword">from</span> <span class="c-string">'@jrmc/catapult'</span>
@@ -115,10 +112,10 @@
           </div>
         </div>
         <div class="step">
-          <div class="step__number">4</div>
+          <div class="step__number">3</div>
           <div class="step__content">
             <h4>Deploy</h4>
-            <pre><code>cata deploy</code></pre>
+            <pre><code>npx cata deploy</code></pre>
           </div>
         </div>
       </div>

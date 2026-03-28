@@ -2,25 +2,21 @@
 
 ## Installation
 
-```bash
-npm install @jrmc/catapult
-```
-
-Once installed, the `cata` CLI is available:
+Run the following command at the root of your project:
 
 ```bash
-cata deploy
+npx @jrmc/catapult init
 ```
 
-## Usage
-
-Generate a `deploy.ts` file at the root of your project:
+This creates a `deploy.ts` configuration file and installs `@jrmc/catapult` as a dev dependency. Once installed, the `cata` CLI is available:
 
 ```bash
-cata init
+npx cata deploy
 ```
 
-Or create it manually:
+## Configuration
+
+Edit the generated `deploy.ts` file, or create it manually:
 
 ```typescript
 import { defineConfig } from '@jrmc/catapult'
@@ -39,7 +35,10 @@ await defineConfig({
       name: 'staging',
       ssh: 'deploy@staging.example.com',
       deployPath: '/home/deploy/staging/myapp',
-      branch: 'develop',
+      branch: {
+        name: 'develop',
+        ask: true,
+      },
       healthcheckUrl: 'http://127.0.0.1:3333/health',
     },
     {
@@ -59,37 +58,37 @@ await defineConfig({
 
 ```bash
 # Show the current version
-cata version
+npx cata version
 
 # Create a deploy.ts configuration file
-cata init
-
-# Deploy
-cata deploy
+npx cata init
 
 # Initial server setup (create directories)
-cata deploy:setup
+npx cata deploy:setup
+
+# Deploy
+npx cata deploy
 
 # Rollback to the previous release
-cata rollback
+npx cata rollback
 
 # Server status
-cata status
+npx cata status
 
 # List releases
-cata list:releases
+npx cata list:releases
 
 # List registered tasks and the current pipeline
-cata list:tasks
+npx cata list:tasks
 
 # Run a specific task on servers
-cata task <task-name>
+npx cata task <task-name>
 
 # Target a specific host
-cata deploy --host staging
+npx cata deploy --host staging
 
 # Override the branch to deploy
-cata deploy --branch feature/my-feature
+npx cata deploy --branch feature/my-feature
 ```
 
 ## Branch
@@ -125,7 +124,7 @@ hosts: [
 You can also override the branch for all hosts at deploy time:
 
 ```bash
-cata deploy --branch feature/my-feature
+npx cata deploy --branch feature/my-feature
 ```
 
 ## Server structure
@@ -171,7 +170,7 @@ hosts: [
 Deployment runs sequentially on each host. To target a single host:
 
 ```bash
-cata deploy --host staging
+npx cata deploy --host staging
 ```
 
 ## Automatic rollback
