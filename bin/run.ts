@@ -12,6 +12,7 @@ import Rollback from '../commands/rollback.js'
 import Status from '../commands/status.js'
 import ListReleases from '../commands/list_releases.js'
 import ListTasks from '../commands/list_tasks.js'
+import ListPipeline from '../commands/list_pipeline.js'
 import RunTask from '../commands/run_task.js'
 
 const skipDeployFile = ['init', 'version'].includes(process.argv[2])
@@ -80,7 +81,7 @@ kernel.on('ansi', async (_, $kernel, parsed) => {
  * Using the List loader to register our command
  */
 kernel.addLoader(
-  new ListLoader([Version, Init, Setup, Deploy, Rollback, Status, ListReleases, ListTasks, RunTask])
+  new ListLoader([Version, Init, Setup, Deploy, Rollback, Status, ListReleases, ListTasks, ListPipeline, RunTask])
 )
 
 /**

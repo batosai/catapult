@@ -78,7 +78,10 @@ npx cata status
 # List releases
 npx cata list:releases
 
-# List registered tasks and the current pipeline
+# Show the current deployment pipeline
+npx cata list:pipeline
+
+# List registered tasks
 npx cata list:tasks
 
 # Run a specific task on servers
