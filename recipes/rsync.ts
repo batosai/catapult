@@ -1,7 +1,6 @@
 import { $ } from 'execa'
 import type {} from '../src/types.ts'
 import { task, get, getContext, remove } from '../index.ts'
-import { resolveSshArgs } from '../src/utils.ts'
 
 remove('deploy:check_branch')
 

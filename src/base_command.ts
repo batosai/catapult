@@ -20,9 +20,10 @@ export abstract class BaseDeployCommand extends BaseCommand {
     }
 
     if (ctx.config.hosts.length > 1) {
-      const selected = await this.prompt.multiple('Select hosts', {
-        choices: ctx.config.hosts.map((h) => ({ name: h.name, message: h.name })),
-      })
+      const selected = await this.prompt.multiple(
+        'Select hosts',
+        ctx.config.hosts.map((h) => ({ name: h.name, message: h.name }))
+      )
       const hosts = ctx.config.hosts.filter((h) => selected.includes(h.name))
       if (hosts.length === 0) {
         this.logger.error('No host selected')
