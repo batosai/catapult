@@ -5,14 +5,14 @@ The pipeline is the sequence of tasks executed during a deployment.
 ## Default pipeline (without recipes)
 
 ```
-deploy:lock → deploy:check_branch → deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:log → deploy:healthcheck → deploy:cleanup → deploy:unlock
+deploy:lock → deploy:check_branch → deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:trace_release → deploy:healthcheck → deploy:cleanup → deploy:unlock
 ```
 
 ## With `adonisjs` + `pm2` recipes
 
 ```
 deploy:lock → deploy:check_branch → deploy:release → deploy:update_code → deploy:shared → adonisjs:build → adonisjs:migrate
-→ deploy:publish → deploy:log → pm2:start → deploy:healthcheck → deploy:cleanup → deploy:unlock
+→ deploy:publish → deploy:trace_release → pm2:start → deploy:healthcheck → deploy:cleanup → deploy:unlock
 ```
 
 ## With `rsync` recipe
@@ -20,7 +20,7 @@ deploy:lock → deploy:check_branch → deploy:release → deploy:update_code �
 The `rsync` recipe removes `deploy:check_branch` from the pipeline (no git clone involved):
 
 ```
-deploy:lock → deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:log → deploy:healthcheck → deploy:cleanup → deploy:unlock
+deploy:lock → deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:trace_release → deploy:healthcheck → deploy:cleanup → deploy:unlock
 ```
 
 ## Task descriptions
@@ -35,7 +35,7 @@ deploy:lock → deploy:release → deploy:update_code → deploy:shared → depl
 | `adonisjs:build`      | Installs dependencies and compiles                      |
 | `adonisjs:migrate`    | Runs migrations                                         |
 | `deploy:publish`      | Switches the `current` symlink to the new release       |
-| `deploy:log`          | Records the deployment in `revisions.log`               |
+| `deploy:trace_release`          | Records the deployment in `revisions.log`               |
 | `pm2:start`           | Starts or reloads the application via PM2               |
 | `deploy:healthcheck`  | Checks that the application is responding               |
 | `deploy:cleanup`      | Removes old releases                                    |

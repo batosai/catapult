@@ -22,7 +22,7 @@ let _pipeline: string[] = [
   'deploy:update_code',
   'deploy:shared',
   'deploy:publish',
-  'deploy:log',
+  'deploy:trace_release',
   'deploy:healthcheck',
   'deploy:unlock',
   'deploy:cleanup',

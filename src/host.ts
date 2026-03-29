@@ -12,7 +12,7 @@ declare module './types.ts' {
     'deploy:update_code': true
     'deploy:shared': true
     'deploy:publish': true
-    'deploy:log': true
+    'deploy:trace_release': true
     'deploy:healthcheck': true
     'deploy:unlock': true
     'deploy:cleanup': true
@@ -130,7 +130,7 @@ task('deploy:publish', () => {
   run('ln -sfn {{release_path}} {{current_path}}')
 })
 
-task('deploy:log', async () => {
+task('deploy:trace_release', async () => {
   const { host, deployCtx } = getContext()
 
   const branch = typeof host.branch === 'object' ? host.branch.name : (host.branch ?? 'unknown')
