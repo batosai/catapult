@@ -3,9 +3,15 @@ export interface BranchWithPrompt {
   ask: boolean
 }
 
+export interface SshConfig {
+  user: string
+  host: string
+  port?: number
+}
+
 export interface Host {
   name: string
-  ssh: string
+  ssh: string | SshConfig
   deployPath: string
   branch?: string | BranchWithPrompt
   healthcheckUrl?: string

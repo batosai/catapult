@@ -91,6 +91,26 @@ npx cata deploy --host staging
 npx cata deploy --branch feature/my-feature
 ```
 
+## SSH
+
+The `ssh` option accepts a connection string or an object:
+
+**Connection string:**
+
+```typescript
+ssh: 'deploy@example.com'
+```
+
+**Object — useful for non-standard ports:**
+
+```typescript
+ssh: {
+  user: 'deploy',
+  host: 'example.com',
+  port: 2222,
+}
+```
+
 ## Branch
 
 The `branch` option on a host accepts a plain string or an object for interactive prompting.

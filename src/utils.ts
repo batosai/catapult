@@ -16,9 +16,16 @@ export function getPaths(baseDir: string, releaseName: string): Paths {
   }
 }
 
+export function resolveSshArgs(host: Host): string[] {
+  if (typeof host.ssh === 'string') return [host.ssh]
+  const { user, host: h, port } = host.ssh
+  return port ? ['-p', String(port), `${user}@${h}`] : [`${user}@${h}`]
+}
+
 export async function ssh(host: Host, command: string, _opts?: { quiet?: boolean }) {
   const b64 = Buffer.from(command).toString('base64')
-  return $`ssh ${host.ssh} ${"bash -lc 'echo " + b64 + "|base64 -d|bash'"}`
+  const args = resolveSshArgs(host)
+  return $`ssh ${args} ${"bash -lc 'echo " + b64 + "|base64 -d|bash'"}`
 }
 
 export async function sleep(ms: number): Promise<void> {
