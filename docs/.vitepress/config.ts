@@ -14,7 +14,6 @@ export default defineConfig({
       },
     ],
   ],
-  base: '/catapult/',
   themeConfig: {
     nav: [
       { text: 'Home', link: '/' },
