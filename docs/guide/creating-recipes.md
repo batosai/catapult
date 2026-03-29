@@ -45,6 +45,20 @@ onSetup(async (ctx, host) => {
 })
 ```
 
+## Status hook
+
+Use `onStatus()` to display additional information during `cata status` (e.g. process manager version, queue state):
+
+```typescript
+import { onStatus } from '@jrmc/catapult'
+import { ssh } from '@jrmc/catapult/utils'
+
+onStatus(async (_ctx, host) => {
+  const { stdout } = await ssh(host, `set +e\nmy-service --version || true`)
+  console.log(`my-service ${stdout.trim() || 'unavailable'}`)
+})
+```
+
 ## Configuration: set() / get()
 
 Expose configurable options via `set()` / `get()` so users can customize the recipe without modifying it:
