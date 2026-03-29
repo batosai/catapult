@@ -6,6 +6,7 @@ import { task, run, getContext, runTask, getPipeline, get } from './task.ts'
 
 declare module './types.ts' {
   interface TaskRegistry {
+    'deploy:lock': true
     'deploy:check_branch': true
     'deploy:release': true
     'deploy:update_code': true
@@ -13,6 +14,7 @@ declare module './types.ts' {
     'deploy:publish': true
     'deploy:log': true
     'deploy:healthcheck': true
+    'deploy:unlock': true
     'deploy:cleanup': true
   }
 }
@@ -34,6 +36,39 @@ export async function runHook(
 // ---------------------------------------------------------------------------
 // Built-in tasks (génériques)
 // ---------------------------------------------------------------------------
+
+task('deploy:lock', async () => {
+  const { host, deployCtx, paths } = getContext()
+
+  try {
+    await ssh(
+      host,
+      `
+      set -e
+      if [ -f ${q(paths.lock)} ]; then
+        echo "Deploy lock already present: ${paths.lock}" >&2
+        exit 1
+      fi
+      echo ${q(deployCtx.release)} > ${q(paths.lock)}
+    `,
+      { quiet: true }
+    )
+  } catch (error) {
+    throw new Error((error as any).stderr?.trim() || (error as Error).message)
+  }
+})
+
+task('deploy:unlock', async () => {
+  const { host, paths } = getContext()
+  await ssh(
+    host,
+    `
+    set +e
+    rm -f ${q(paths.lock)}
+    true
+  `
+  )
+})
 
 task('deploy:check_branch', async () => {
   const { host, deployCtx } = getContext()
@@ -171,44 +206,6 @@ export async function setupHost(ctx: DeployContext, host: Host): Promise<void> {
   )
 }
 
-export async function acquireLock(ctx: DeployContext, host: Host): Promise<void> {
-  const paths = getPaths(host.deployPath, ctx.release)
-
-  console.log(`==> [${host.name}] acquire lock`)
-
-  try {
-    await ssh(
-      host,
-      `
-      set -e
-      if [ -f ${q(paths.lock)} ]; then
-        echo "Deploy lock already present: ${paths.lock}" >&2
-        exit 1
-      fi
-      echo ${q(ctx.release)} > ${q(paths.lock)}
-    `,
-      { quiet: true }
-    )
-  } catch (error) {
-    throw new Error((error as any).stderr?.trim() || (error as Error).message)
-  }
-}
-
-export async function releaseLock(ctx: DeployContext, host: Host): Promise<void> {
-  const paths = getPaths(host.deployPath, ctx.release)
-
-  console.log(`==> [${host.name}] release lock`)
-
-  await ssh(
-    host,
-    `
-    set +e
-    rm -f ${q(paths.lock)}
-    true
-  `
-  )
-}
-
 async function healthcheckOrThrow(ctx: DeployContext, host: Host): Promise<void> {
   console.log(`==> [${host.name}] healthcheck ${host.healthcheckUrl}`)
 
@@ -313,7 +310,6 @@ export async function deployHost(ctx: DeployContext, host: Host): Promise<void> 
   let published = false
 
   await runHook(ctx, 'beforeHostDeploy', { host })
-  await acquireLock(ctx, host)
 
   try {
     for (const taskName of getPipeline()) {
@@ -335,9 +331,9 @@ export async function deployHost(ctx: DeployContext, host: Host): Promise<void> 
       }
     }
 
+    await runTask('deploy:unlock', ctx, host)
     throw error
   } finally {
-    await releaseLock(ctx, host)
     await runHook(ctx, 'afterHostDeploy', { host })
   }
 }

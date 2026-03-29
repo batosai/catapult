@@ -5,14 +5,14 @@ The pipeline is the sequence of tasks executed during a deployment.
 ## Default pipeline (without recipes)
 
 ```
-deploy:check_branch → deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:log → deploy:healthcheck → deploy:cleanup
+deploy:lock → deploy:check_branch → deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:log → deploy:healthcheck → deploy:cleanup → deploy:unlock
 ```
 
 ## With `adonisjs` + `pm2` recipes
 
 ```
-deploy:check_branch → deploy:release → deploy:update_code → deploy:shared → adonisjs:build → adonisjs:migrate
-→ deploy:publish → deploy:log → pm2:start → deploy:healthcheck → deploy:cleanup
+deploy:lock → deploy:check_branch → deploy:release → deploy:update_code → deploy:shared → adonisjs:build → adonisjs:migrate
+→ deploy:publish → deploy:log → pm2:start → deploy:healthcheck → deploy:cleanup → deploy:unlock
 ```
 
 ## With `rsync` recipe
@@ -20,13 +20,14 @@ deploy:check_branch → deploy:release → deploy:update_code → deploy:shared 
 The `rsync` recipe removes `deploy:check_branch` from the pipeline (no git clone involved):
 
 ```
-deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:log → deploy:healthcheck → deploy:cleanup
+deploy:lock → deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:log → deploy:healthcheck → deploy:cleanup → deploy:unlock
 ```
 
 ## Task descriptions
 
 | Task                  | Description                                             |
 | --------------------- | ------------------------------------------------------- |
+| `deploy:lock`         | Creates a lock file to prevent concurrent deployments   |
 | `deploy:check_branch` | Verifies the branch exists on the remote repository     |
 | `deploy:release`      | Creates the release directory                           |
 | `deploy:update_code`  | Clones the git repository on the server                 |
@@ -38,6 +39,7 @@ deploy:release → deploy:update_code → deploy:shared → deploy:publish → d
 | `pm2:start`           | Starts or reloads the application via PM2               |
 | `deploy:healthcheck`  | Checks that the application is responding               |
 | `deploy:cleanup`      | Removes old releases                                    |
+| `deploy:unlock`       | Removes the lock file (also called on failure)          |
 
 ## Adding a task to the pipeline
 

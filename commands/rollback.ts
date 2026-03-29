@@ -1,5 +1,6 @@
 import { getCtx } from '../src/ctx.ts'
-import { acquireLock, releaseLock, rollbackHost } from '../src/host.ts'
+import { rollbackHost } from '../src/host.ts'
+import { runTask } from '../src/task.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
 
 export default class Rollback extends BaseDeployCommand {
@@ -13,11 +14,11 @@ export default class Rollback extends BaseDeployCommand {
     if (!hosts) return
 
     for (const host of hosts) {
-      await acquireLock(ctx, host)
+      await runTask('deploy:lock', ctx, host)
       try {
         await rollbackHost(ctx, host)
       } finally {
-        await releaseLock(ctx, host)
+        await runTask('deploy:unlock', ctx, host)
       }
     }
     this.logger.action('rollback').succeeded()
