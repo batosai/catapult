@@ -1,20 +1,16 @@
-import { BaseCommand, flags } from '@adonisjs/ace'
 import { getCtx } from '../src/ctx.ts'
 import { acquireLock, releaseLock, rollbackHost } from '../src/host.ts'
+import { BaseDeployCommand } from '../src/base_command.ts'
 
-export default class Rollback extends BaseCommand {
+export default class Rollback extends BaseDeployCommand {
   static commandName = 'rollback'
   static description = 'Rollback to the previous release'
-
-  @flags.string({ description: 'Rollback a specific host' })
-  declare host: string | undefined
 
   async run() {
     const ctx = getCtx()
 
-    const hosts = this.host
-      ? ctx.config.hosts.filter((h) => h.name === this.host)
-      : ctx.config.hosts
+    const hosts = await this.selectHosts()
+    if (!hosts) return
 
     for (const host of hosts) {
       await acquireLock(ctx, host)

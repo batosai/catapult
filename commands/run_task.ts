@@ -1,21 +1,17 @@
-import { BaseCommand, args, flags } from '@adonisjs/ace'
+import { args } from '@adonisjs/ace'
 import { getCtx } from '../src/ctx.ts'
 import { hasTask, runTask, getTasks } from '../src/task.ts'
+import { BaseDeployCommand } from '../src/base_command.ts'
 
-export default class RunTask extends BaseCommand {
+export default class RunTask extends BaseDeployCommand {
   static commandName = 'task'
   static description = 'Run a registered task on servers'
 
   @args.string({ description: 'Task name to run' })
   declare taskName: string
 
-  @flags.string({ description: 'Run on a specific host' })
-  declare host: string | undefined
-
   async run() {
     const ctx = getCtx()
-
-    console.log(this.taskName)
 
     if (!hasTask(this.taskName)) {
       this.logger.error(`Unknown task: ${this.taskName}. Available: ${getTasks().join(', ')}`)
@@ -23,9 +19,8 @@ export default class RunTask extends BaseCommand {
       return
     }
 
-    const hosts = this.host
-      ? ctx.config.hosts.filter((h) => h.name === this.host)
-      : ctx.config.hosts
+    const hosts = await this.selectHosts()
+    if (!hosts) return
 
     for (const host of hosts) {
       await runTask(this.taskName, ctx, host)

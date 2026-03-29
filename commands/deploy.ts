@@ -1,13 +1,11 @@
-import { BaseCommand, flags } from '@adonisjs/ace'
+import { flags } from '@adonisjs/ace'
 import { getCtx } from '../src/ctx.ts'
 import { deployHost } from '../src/host.ts'
+import { BaseDeployCommand } from '../src/base_command.ts'
 
-export default class Deploy extends BaseCommand {
+export default class Deploy extends BaseDeployCommand {
   static commandName = 'deploy'
   static description = 'Deploy to servers'
-
-  @flags.string({ description: 'Deploy to a specific host' })
-  declare host: string | undefined
 
   @flags.string({ description: 'Override the branch to deploy' })
   declare branch: string | undefined
@@ -15,15 +13,8 @@ export default class Deploy extends BaseCommand {
   async run() {
     const ctx = getCtx()
 
-    let hosts = this.host
-      ? ctx.config.hosts.filter((h) => h.name === this.host)
-      : ctx.config.hosts
-
-    if (this.host && hosts.length === 0) {
-      this.logger.error(`Unknown host: ${this.host}`)
-      this.exitCode = 1
-      return
-    }
+    let hosts = await this.selectHosts()
+    if (!hosts) return
 
     hosts = await Promise.all(
       hosts.map(async (host) => {

@@ -1,16 +1,19 @@
-import { BaseCommand } from '@adonisjs/ace'
 import { getCtx } from '../src/ctx.ts'
 import { getCurrentRelease } from '../src/host.ts'
 import { q, getPaths, ssh } from '../src/utils.ts'
+import { BaseDeployCommand } from '../src/base_command.ts'
 
-export default class ListReleases extends BaseCommand {
+export default class ListReleases extends BaseDeployCommand {
   static commandName = 'list:releases'
   static description = 'List releases on servers'
 
   async run() {
     const ctx = getCtx()
 
-    for (const host of ctx.config.hosts) {
+    const hosts = await this.selectHosts()
+    if (!hosts) return
+
+    for (const host of hosts) {
       const paths = getPaths(host.deployPath, ctx.release)
 
       const current = await getCurrentRelease(ctx, host)

@@ -167,11 +167,21 @@ hosts: [
 ],
 ```
 
-Deployment runs sequentially on each host. To target a single host:
+When multiple hosts are configured, most commands prompt you to select which host(s) to target:
+
+```
+? Select hosts  ›  Space to select. Return to submit.
+❯ ◯ staging
+  ◯ production
+```
+
+To skip the prompt and target a specific host directly:
 
 ```bash
 npx cata deploy --host staging
 ```
+
+The `--host` flag is available on all commands: `deploy`, `rollback`, `status`, `list:releases`, `task`.
 
 ## Automatic rollback
 
