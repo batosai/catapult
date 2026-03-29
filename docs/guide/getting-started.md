@@ -201,7 +201,7 @@ To skip the prompt and target a specific host directly:
 npx cata deploy --host staging
 ```
 
-The `--host` flag is available on all commands: `deploy`, `rollback`, `status`, `list:releases`, `task`.
+The `--host` flag is available on all commands: `deploy`, `deploy:setup`, `rollback`, `status`, `list:releases`, `task`.
 
 ## Automatic rollback
 
