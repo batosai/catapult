@@ -57,7 +57,7 @@ set('rsync_excludes', ['.git', 'node_modules', '.env', 'storage', 'tmp', 'logs']
 
 ### Upload: git vs rsync
 
-By default, `deploy:upload` performs a `git clone` on the server:
+By default, `deploy:update_code` performs a `git clone` on the server:
 
 ```typescript
 hosts: [

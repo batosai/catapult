@@ -13,7 +13,7 @@ task('my-recipe:build', () => {
   run('npm run build')
 })
 
-after('deploy:upload', 'my-recipe:build')
+after('deploy:update_code', 'my-recipe:build')
 ```
 
 Importing the file is enough to activate it:

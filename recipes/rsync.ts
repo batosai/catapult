@@ -7,11 +7,11 @@ remove('deploy:check_branch')
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
-    'deploy:upload': true
+    'deploy:update_code': true
   }
 }
 
-task('deploy:upload', async () => {
+task('deploy:update_code', async () => {
   const { host, paths } = getContext()
   const [target] = resolveSshArgs(host)
   const args: string[] = ['-az', '-e', rsyncSshFlag(host)]

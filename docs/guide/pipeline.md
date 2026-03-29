@@ -5,13 +5,13 @@ The pipeline is the sequence of tasks executed during a deployment.
 ## Default pipeline (without recipes)
 
 ```
-deploy:check_branch → deploy:release → deploy:upload → deploy:publish → deploy:log → deploy:healthcheck → deploy:cleanup
+deploy:check_branch → deploy:release → deploy:update_code → deploy:publish → deploy:log → deploy:healthcheck → deploy:cleanup
 ```
 
 ## With `adonisjs` + `pm2` recipes
 
 ```
-deploy:check_branch → deploy:release → deploy:upload → adonisjs:shared → adonisjs:build → adonisjs:migrate
+deploy:check_branch → deploy:release → deploy:update_code → adonisjs:shared → adonisjs:build → adonisjs:migrate
 → deploy:publish → deploy:log → pm2:start → deploy:healthcheck → deploy:cleanup
 ```
 
@@ -20,7 +20,7 @@ deploy:check_branch → deploy:release → deploy:upload → adonisjs:shared →
 The `rsync` recipe removes `deploy:check_branch` from the pipeline (no git clone involved):
 
 ```
-deploy:release → deploy:upload → deploy:publish → deploy:log → deploy:healthcheck → deploy:cleanup
+deploy:release → deploy:update_code → deploy:publish → deploy:log → deploy:healthcheck → deploy:cleanup
 ```
 
 ## Task descriptions
@@ -29,7 +29,7 @@ deploy:release → deploy:upload → deploy:publish → deploy:log → deploy:he
 | ---------------------- | ------------------------------------------------------------ |
 | `deploy:check_branch`  | Verifies the branch exists on the remote repository          |
 | `deploy:release`       | Creates the release directory                                |
-| `deploy:upload`        | Clones the git repository on the server                      |
+| `deploy:update_code`        | Clones the git repository on the server                      |
 | `adonisjs:shared`      | Creates symlinks to shared directories (storage, logs, .env) |
 | `adonisjs:build`       | Installs dependencies and compiles                           |
 | `adonisjs:migrate`     | Runs migrations                                              |
@@ -80,7 +80,7 @@ import { setPipeline } from '@jrmc/catapult'
 
 setPipeline([
   'deploy:release',
-  'deploy:upload',
+  'deploy:update_code',
   'adonisjs:build',
   'deploy:publish',
   'pm2:start',

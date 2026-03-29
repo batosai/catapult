@@ -8,7 +8,7 @@ declare module './types.ts' {
   interface TaskRegistry {
     'deploy:check_branch': true
     'deploy:release': true
-    'deploy:upload': true
+    'deploy:update_code': true
     'deploy:publish': true
     'deploy:log': true
     'deploy:healthcheck': true
@@ -57,7 +57,7 @@ task('deploy:release', () => {
   run('mkdir -p {{release_path}}')
 })
 
-task('deploy:upload', async () => {
+task('deploy:update_code', async () => {
   const { host, paths, deployCtx } = getContext()
 
   if (!host.branch) throw new Error(`[${host.name}] git mode requires "branch" on host`)
