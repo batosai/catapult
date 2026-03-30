@@ -23,7 +23,7 @@ if (!skipDeployFile) {
 
   if (!deployFile) {
     console.error(
-      'No deploy.ts or deploy.js found in current directory. Run `cata init` to create one.'
+      'No deploy.ts or deploy.js found in current directory. Run `npx cata init` to create one.'
     )
     process.exit(1)
   }
@@ -81,7 +81,18 @@ kernel.on('ansi', async (_, $kernel, parsed) => {
  * Using the List loader to register our command
  */
 kernel.addLoader(
-  new ListLoader([Version, Init, Setup, Deploy, Rollback, Status, ListReleases, ListTasks, ListPipeline, RunTask])
+  new ListLoader([
+    Version,
+    Init,
+    Setup,
+    Deploy,
+    Rollback,
+    Status,
+    ListReleases,
+    ListTasks,
+    ListPipeline,
+    RunTask,
+  ])
 )
 
 /**
