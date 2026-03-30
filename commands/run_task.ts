@@ -1,6 +1,7 @@
 import { args } from '@adonisjs/ace'
 import { getCtx } from '../src/ctx.ts'
 import { hasTask, runTask, getTasks } from '../src/task.ts'
+import { getCurrentRelease } from '../src/host.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
 
 export default class RunTask extends BaseDeployCommand {
@@ -23,7 +24,13 @@ export default class RunTask extends BaseDeployCommand {
     if (!hosts) return
 
     for (const host of hosts) {
-      await runTask(this.taskName, ctx, host)
+      const currentRelease = await getCurrentRelease(ctx, host)
+      if (!currentRelease) {
+        this.logger.error(`[${host.name}] no current release found, run deploy first`)
+        this.exitCode = 1
+        continue
+      }
+      await runTask(this.taskName, { ...ctx, release: currentRelease }, host)
     }
   }
 }
