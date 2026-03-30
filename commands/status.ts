@@ -1,6 +1,6 @@
 import { getCtx } from '../src/ctx.ts'
 import { getCurrentRelease } from '../src/host.ts'
-import { getPipeline, getStatusHooks } from '../src/task.ts'
+import { getPipeline, getStatusHooks, bin } from '../src/task.ts'
 import { q, getPaths, ssh } from '../src/utils.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
 
@@ -27,7 +27,7 @@ export default class Status extends BaseDeployCommand {
           try {
             await ssh(
               host,
-              `set -e\ncurl --fail --silent --show-error --max-time 5 ${q(host.healthcheckUrl)} >/dev/null`
+              `set -e\n${bin('curl')} --fail --silent --show-error --max-time 5 ${q(host.healthcheckUrl)} >/dev/null`
             )
             this.logger.log(`Health   ${this.colors.green('OK')}`)
           } catch {
@@ -37,11 +37,13 @@ export default class Status extends BaseDeployCommand {
 
         const { stdout: versionsStdout } = await ssh(
           host,
-          `set +e\ncd ${q(paths.current)}\nnode --version 2>/dev/null || true\nnpm --version 2>/dev/null || true`
+          `set +e\ncd ${q(paths.current)}\necho "NODE:$(${bin('node')} --version 2>/dev/null || true)"\necho "NPM:$(${bin('npm')} --version 2>/dev/null || true)"`
         )
-        const [nodeVersion, npmVersion] = versionsStdout.trim().split('\n')
-        this.logger.log(`Node     ${this.colors.dim(nodeVersion?.trim() || 'unavailable')}`)
-        this.logger.log(`npm      ${this.colors.dim(npmVersion?.trim() || 'unavailable')}`)
+        const lines = versionsStdout.trim().split('\n')
+        const nodeVersion = lines.find((l) => l.startsWith('NODE:'))?.slice(5) || ''
+        const npmVersion = lines.find((l) => l.startsWith('NPM:'))?.slice(4) || ''
+        this.logger.log(`Node     ${this.colors.dim(nodeVersion || 'unavailable')}`)
+        this.logger.log(`npm      ${this.colors.dim(npmVersion || 'unavailable')}`)
 
         for (const hook of getStatusHooks()) {
           await hook(ctx, host)
