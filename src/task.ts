@@ -1,5 +1,10 @@
 import type { Host, DeployContext, Paths, TaskName } from './types.ts'
 import { q, getPaths, ssh } from './utils.ts'
+import { colors } from '@poppinss/cliui'
+
+export const yellow = (s: string) => colors.ansi().yellow(s)
+export const blue = (s: string) => colors.ansi().blue(s)
+export const gray = (s: string) => colors.ansi().dim(s)
 
 export type TaskFn = () => void | Promise<void>
 
@@ -17,7 +22,7 @@ const _registry = new Map<string, TaskFn>()
 
 let _pipeline: string[] = [
   'deploy:lock',
-  'deploy:check_branch',
+  'git:check',
   'deploy:release',
   'deploy:update_code',
   'deploy:shared',
@@ -198,8 +203,15 @@ function _resolve(str: string): string {
     .replace(/\{\{release\}\}/g, _execCtx.deployCtx.release)
 }
 
+export function isVerbose(): boolean {
+  return _execCtx?.deployCtx.config.verbose ?? false
+}
+
 async function _flush(): Promise<void> {
   if (!_execCtx || _execCtx.commands.length === 0) return
   const cmds = _execCtx.commands.splice(0)
+  if (_execCtx.deployCtx.config.verbose) {
+    for (const cmd of cmds) console.log(yellow(`    $ ${cmd}`))
+  }
   await ssh(_execCtx.host, ['set -e', ...cmds].join('\n'))
 }

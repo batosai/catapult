@@ -1,5 +1,5 @@
 import type {} from '../src/types.ts'
-import { task, cd, run, after, bin, get, set, pm, pmInstall, pmInstallProd } from '../index.ts'
+import { task, cd, run, after, bin, get, set, pmInstall, pmInstallProd } from '../index.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {

@@ -2,12 +2,12 @@ import type { Host, DeployContext, Hooks, HookContext } from './types.ts'
 
 import { $ } from 'execa'
 import { q, getPaths, ssh, sleep } from './utils.ts'
-import { task, run, getContext, runTask, getPipeline, get } from './task.ts'
+import { task, run, getContext, runTask, getPipeline, get, isVerbose, yellow, blue, gray } from './task.ts'
 
 declare module './types.ts' {
   interface TaskRegistry {
     'deploy:lock': true
-    'deploy:check_branch': true
+    'git:check': true
     'deploy:release': true
     'deploy:update_code': true
     'deploy:shared': true
@@ -70,7 +70,7 @@ task('deploy:unlock', async () => {
   )
 })
 
-task('deploy:check_branch', async () => {
+task('git:check', async () => {
   const { host, deployCtx } = getContext()
 
   if (!host.branch) return
@@ -79,10 +79,12 @@ task('deploy:check_branch', async () => {
 
   let repository = deployCtx.config.repository
   if (!repository) {
+    if (isVerbose()) console.log(yellow('    $ git remote get-url origin'))
     repository = (await $`git remote get-url origin`).stdout.trim()
   }
 
   try {
+    if (isVerbose()) console.log(yellow(`    $ git ls-remote --exit-code --heads ${repository} ${branchName}`))
     await $`git ls-remote --exit-code --heads ${repository} ${branchName}`
   } catch {
     throw new Error(`[${host.name}] branch "${branchName}" does not exist on remote ${repository}`)
@@ -102,6 +104,7 @@ task('deploy:update_code', async () => {
 
   let repository = deployCtx.config.repository
   if (!repository) {
+    if (isVerbose()) console.log(yellow('    $ git remote get-url origin'))
     repository = (await $`git remote get-url origin`).stdout.trim()
   }
 
@@ -138,7 +141,9 @@ task('deploy:trace_release', async () => {
   let user = 'unknown'
 
   try {
+    if (isVerbose()) console.log(yellow('    $ git rev-parse HEAD'))
     commit = (await $`git rev-parse HEAD`).stdout.trim()
+    if (isVerbose()) console.log(yellow('    $ git config user.name'))
     user = (await $`git config user.name`).stdout.trim()
   } catch {}
 
@@ -180,7 +185,7 @@ task('deploy:cleanup', async () => {
 export async function setupHost(ctx: DeployContext, host: Host): Promise<void> {
   const paths = getPaths(host.deployPath, ctx.release)
 
-  console.log(`==> [${host.name}] setup directories`)
+  console.log(`==> ${blue(`[${host.name}]`)} setup directories`)
 
   const dirs: string[] = get('writable_dirs', [])
   const files: string[] = get('shared_files', [])
@@ -207,7 +212,7 @@ export async function setupHost(ctx: DeployContext, host: Host): Promise<void> {
 }
 
 async function healthcheckOrThrow(ctx: DeployContext, host: Host): Promise<void> {
-  console.log(`==> [${host.name}] healthcheck ${host.healthcheckUrl}`)
+  console.log(`==> ${blue(`[${host.name}]`)} healthcheck ${host.healthcheckUrl}`)
 
   if (ctx.config.healthcheckRetries) {
     for (let i = 1; i <= ctx.config.healthcheckRetries; i += 1) {
@@ -219,10 +224,10 @@ async function healthcheckOrThrow(ctx: DeployContext, host: Host): Promise<void>
         curl --fail --silent --show-error --max-time 5 ${q(host.healthcheckUrl)} >/dev/null
       `
         )
-        console.log(`==> [${host.name}] healthcheck OK (${i}/${ctx.config.healthcheckRetries})`)
+        console.log(`==> ${blue(`[${host.name}]`)} healthcheck OK (${i}/${ctx.config.healthcheckRetries})`)
         return
       } catch {
-        console.log(`==> [${host.name}] healthcheck failed (${i}/${ctx.config.healthcheckRetries})`)
+        console.log(`==> ${blue(`[${host.name}]`)} healthcheck failed (${i}/${ctx.config.healthcheckRetries})`)
         if (i < ctx.config.healthcheckRetries) {
           await sleep(ctx.config.healthcheckDelayMs || 3_000)
         }
@@ -293,7 +298,7 @@ export async function rollbackHost(ctx: DeployContext, host: Host): Promise<void
     throw new Error(`[${host.name}] no previous release available`)
   }
 
-  console.log(`==> [${host.name}] rollback to ${previous}`)
+  console.log(`==> ${blue(`[${host.name}]`)} rollback to ${previous}`)
 
   await ssh(host, `set -e\nln -sfn ${q(paths.releases + '/' + previous)} ${q(paths.current)}`)
 
@@ -306,28 +311,36 @@ export async function rollbackHost(ctx: DeployContext, host: Host): Promise<void
   }
 }
 
+function elapsed(ms: number): string {
+  const total = Math.round(ms / 1000)
+  const m = Math.floor(total / 60).toString().padStart(2, '0')
+  const s = (total % 60).toString().padStart(2, '0')
+  return `${m}:${s}`
+}
+
 export async function deployHost(ctx: DeployContext, host: Host): Promise<void> {
   let published = false
+  const deployStart = Date.now()
 
   await runHook(ctx, 'beforeHostDeploy', { host })
 
   try {
     for (const taskName of getPipeline()) {
-      console.log(`==> [${host.name}] ${taskName}`)
+      console.log(`${gray(elapsed(Date.now() - deployStart))} ${blue(`[${host.name}]`)} ${taskName}`)
       await runTask(taskName, ctx, host)
       if (taskName === 'deploy:publish') published = true
     }
 
-    console.log(`✅ [${host.name}] deploy OK -> ${ctx.release}`)
+    console.log(`✅ ${blue(`[${host.name}]`)} deploy OK -> ${ctx.release} ${gray(`(${elapsed(Date.now() - deployStart)})`)}`)
   } catch (error) {
-    console.error(`❌ [${host.name}] deploy failed: ${(error as Error).message}`)
+    console.error(`❌ ${blue(`[${host.name}]`)} deploy failed: ${(error as Error).message}`)
 
     if (published) {
       try {
         await rollbackHost(ctx, host)
-        console.log(`↩️ [${host.name}] auto rollback OK`)
+        console.log(`↩️ ${blue(`[${host.name}]`)} auto rollback OK`)
       } catch (rollbackError) {
-        console.error(`💥 [${host.name}] auto rollback failed: ${(rollbackError as Error).message}`)
+        console.error(`💥 ${blue(`[${host.name}]`)} auto rollback failed: ${(rollbackError as Error).message}`)
       }
     }
 
