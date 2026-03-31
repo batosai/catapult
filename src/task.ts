@@ -127,6 +127,27 @@ export function bin(name: string): string {
   return get(`bin/${name}`, name)
 }
 
+/** Retourne le binaire du package manager courant (npm, pnpm, yarn). */
+export function pm(): string {
+  return bin(get('package_manager', 'npm'))
+}
+
+/** Retourne la commande d'installation (frozen lockfile). */
+export function pmInstall(): string {
+  const manager: string = get('package_manager', 'npm')
+  if (manager === 'pnpm') return `${pm()} install --frozen-lockfile`
+  if (manager === 'yarn') return `${pm()} install --frozen-lockfile`
+  return `${pm()} ci`
+}
+
+/** Retourne la commande d'installation en mode production. */
+export function pmInstallProd(): string {
+  const manager: string = get('package_manager', 'npm')
+  if (manager === 'pnpm') return `${pm()} install --prod`
+  if (manager === 'yarn') return `${pm()} install --production`
+  return `${pm()} install --omit=dev`
+}
+
 /** Retire une tâche du pipeline. */
 export function remove(name: TaskName): void {
   const idx = _pipeline.indexOf(name)

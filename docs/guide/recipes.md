@@ -35,6 +35,34 @@ set('shared_files', ['.env', '.env.production'])
 import '@catapultjs/deploy/recipes/adonisjs'
 ```
 
+### Package manager
+
+By default the recipe uses `npm`. Set `package_manager` to switch to `pnpm` or `yarn`:
+
+```typescript
+set('package_manager', 'pnpm') // or 'yarn'
+
+import '@catapultjs/deploy/recipes/adonisjs'
+```
+
+| Setting | Install command | Production install |
+| ------- | --------------- | ------------------ |
+| `npm`   | `npm ci` | `npm install --omit=dev` |
+| `pnpm`  | `pnpm install --frozen-lockfile` | `pnpm install --prod` |
+| `yarn`  | `yarn install --frozen-lockfile` | `yarn install --production` |
+
+The `pm()`, `pmInstall()` and `pmInstallProd()` helpers are also available for your own tasks:
+
+```typescript
+import { task, cd, run, pm, pmInstall } from '@catapultjs/deploy'
+
+task('my:build', () => {
+  cd('{{release_path}}')
+  run(pmInstall())
+  run(`${pm()} run build`)
+})
+```
+
 ## `recipes/pm2`
 
 Adds the `pm2:start` task to start or reload processes via PM2.

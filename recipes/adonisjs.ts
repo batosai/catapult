@@ -1,5 +1,5 @@
 import type {} from '../src/types.ts'
-import { task, cd, run, after, bin, get, set } from '../index.ts'
+import { task, cd, run, after, bin, get, set, pm, pmInstall, pmInstallProd } from '../index.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
@@ -16,11 +16,9 @@ set('adonisjs_path', '')
 task('adonisjs:build', () => {
   const adonisjs_path = get('adonisjs_path')
   cd(`{{release_path}}${adonisjs_path}`)
-  run(`${bin('npm')} ci`)
+  run(pmInstall())
   run(`${bin('node')} ace build`)
-  run(
-    `if [ -f package-lock.tson ]; then ${bin('npm')} ci --omit=dev; else ${bin('npm')} install --omit=dev; fi`
-  )
+  run(pmInstallProd())
 })
 
 task('adonisjs:migrate', () => {
