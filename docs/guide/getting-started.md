@@ -91,6 +91,9 @@ npx cata list:tasks
 # Run a specific task on servers
 npx cata task <task-name>
 
+# Open an interactive SSH session on a host
+npx cata ssh
+
 # Target a specific host
 npx cata deploy --host staging
 

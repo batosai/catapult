@@ -13,6 +13,7 @@ import ListReleases from '../commands/list_releases.js'
 import ListTasks from '../commands/list_tasks.js'
 import ListPipeline from '../commands/list_pipeline.js'
 import RunTask from '../commands/run_task.js'
+import Ssh from '../commands/ssh.js'
 
 const skipDeployFile = ['init', 'version'].includes(process.argv[2])
 
@@ -90,6 +91,7 @@ kernel.addLoader(
     ListTasks,
     ListPipeline,
     RunTask,
+    Ssh,
   ])
 )
 
