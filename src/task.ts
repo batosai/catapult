@@ -32,24 +32,24 @@ let _pipeline: string[] = [
 
 let _execCtx: ExecCtx | null = null
 
-/** Retourne le contexte d'exécution courant. À utiliser dans les tâches async. */
+/** Returns the current execution context. Must be called inside a task. */
 export function getContext(): TaskContext {
   if (!_execCtx) throw new Error('getContext() must be called inside a task')
   return _execCtx
 }
 
 /**
- * Définit ou surcharge une tâche nommée.
- * Utilise cd() et run() pour envoyer des commandes SSH,
- * ou une fonction async pour des opérations plus complexes.
+ * Defines or overrides a named task.
+ * Use cd() and run() to send SSH commands,
+ * or an async function for more complex operations.
  */
 export function task(name: TaskName, fn: TaskFn): void {
   _registry.set(name, fn)
 }
 
 /**
- * Change de répertoire sur le serveur distant.
- * Variables disponibles : {{release_path}}, {{current_path}},
+ * Changes directory on the remote server.
+ * Available variables: {{release_path}}, {{current_path}},
  * {{shared_path}}, {{releases_path}}, {{base_path}}, {{release}}
  */
 export function cd(path: string): void {
@@ -58,15 +58,15 @@ export function cd(path: string): void {
 }
 
 /**
- * Exécute une commande sur le serveur distant.
- * Les commandes sont regroupées en un seul appel SSH avec `set -e`.
+ * Runs a command on the remote server.
+ * Commands are batched into a single SSH call with `set -e`.
  */
 export function run(command: string): void {
   if (!_execCtx) throw new Error('run() must be called inside a task')
   _execCtx.commands.push(_resolve(command))
 }
 
-/** Exécute une tâche nommée pour un host donné. */
+/** Runs a named task for a given host. */
 export async function runTask(name: TaskName, deployCtx: DeployContext, host: Host): Promise<void> {
   const fn = _registry.get(name)
   if (!fn) throw new Error(`Task not found: "${name}"`)
@@ -83,58 +83,58 @@ export async function runTask(name: TaskName, deployCtx: DeployContext, host: Ho
   }
 }
 
-/** Insère une tâche avant une tâche existante dans le pipeline. */
+/** Inserts a task before an existing one in the pipeline. */
 export function before(existing: TaskName, newTask: TaskName): void {
   const idx = _pipeline.indexOf(existing)
   if (idx === -1) throw new Error(`Task "${existing}" not found in pipeline`)
   _pipeline.splice(idx, 0, newTask)
 }
 
-/** Insère une tâche après une tâche existante dans le pipeline. */
+/** Inserts a task after an existing one in the pipeline. */
 export function after(existing: TaskName, newTask: TaskName): void {
   const idx = _pipeline.indexOf(existing)
   if (idx === -1) throw new Error(`Task "${existing}" not found in pipeline`)
   _pipeline.splice(idx + 1, 0, newTask)
 }
 
-/** Retourne une copie du pipeline courant. */
+/** Returns a copy of the current pipeline. */
 export function getPipeline(): string[] {
   return [..._pipeline]
 }
 
-/** Vérifie si une tâche est enregistrée. */
+/** Checks whether a task is registered. */
 export function hasTask(name: TaskName): boolean {
   return _registry.has(name)
 }
 
-/** Retourne la liste des tâches enregistrées. */
+/** Returns the list of registered task names. */
 export function getTasks(): string[] {
   return [..._registry.keys()]
 }
 
 const _vars = new Map<string, unknown>()
 
-/** Définit une variable de configuration accessible par les recettes. */
+/** Sets a configuration variable accessible from recipes. */
 export function set(key: string, value: unknown): void {
   _vars.set(key, value)
 }
 
-/** Lit une variable de configuration. */
+/** Reads a configuration variable. */
 export function get<T>(key: string, defaultValue?: T): T {
   return (_vars.has(key) ? _vars.get(key) : defaultValue) as T
 }
 
-/** Retourne le chemin d'un binaire, configurable via set('bin/<name>', '/path/to/bin'). */
+/** Returns the path to a binary, configurable via set('bin/<name>', '/path/to/bin'). */
 export function bin(name: string): string {
   return get(`bin/${name}`, name)
 }
 
-/** Retourne le binaire du package manager courant (npm, pnpm, yarn). */
+/** Returns the current package manager binary (npm, pnpm, yarn). */
 export function pm(): string {
   return bin(get('package_manager', 'npm'))
 }
 
-/** Retourne la commande d'installation (frozen lockfile). */
+/** Returns the install command with frozen lockfile. */
 export function pmInstall(): string {
   const manager: string = get('package_manager', 'npm')
   if (manager === 'pnpm') return `${pm()} install --frozen-lockfile`
@@ -142,7 +142,7 @@ export function pmInstall(): string {
   return `${pm()} ci`
 }
 
-/** Retourne la commande d'installation en mode production. */
+/** Returns the production-only install command. */
 export function pmInstallProd(): string {
   const manager: string = get('package_manager', 'npm')
   if (manager === 'pnpm') return `${pm()} install --prod`
@@ -150,14 +150,14 @@ export function pmInstallProd(): string {
   return `${pm()} install --omit=dev`
 }
 
-/** Retire une tâche du pipeline. */
+/** Removes a task from the pipeline. */
 export function remove(name: TaskName): void {
   const idx = _pipeline.indexOf(name)
   if (idx === -1) throw new Error(`Task "${name}" not found in pipeline`)
   _pipeline.splice(idx, 1)
 }
 
-/** Remplace entièrement le pipeline. */
+/** Replaces the entire pipeline. */
 export function setPipeline(tasks: string[]): void {
   _pipeline = [...tasks]
 }
@@ -166,24 +166,24 @@ type LifecycleHook = (ctx: DeployContext, host: Host) => Promise<void> | void
 
 const _setupHooks: LifecycleHook[] = []
 
-/** Enregistre une fonction à exécuter lors du deploy:setup, après l'initialisation des dossiers de base. */
+/** Registers a function to run during deploy:setup, after base directories are initialized. */
 export function onSetup(fn: LifecycleHook): void {
   _setupHooks.push(fn)
 }
 
-/** Retourne les hooks de setup enregistrés. */
+/** Returns the registered setup hooks. */
 export function getSetupHooks(): LifecycleHook[] {
   return [..._setupHooks]
 }
 
 const _statusHooks: LifecycleHook[] = []
 
-/** Enregistre une fonction à exécuter lors de la commande status. */
+/** Registers a function to run during the status command. */
 export function onStatus(fn: LifecycleHook): void {
   _statusHooks.push(fn)
 }
 
-/** Retourne les hooks de status enregistrés. */
+/** Returns the registered status hooks. */
 export function getStatusHooks(): LifecycleHook[] {
   return [..._statusHooks]
 }
