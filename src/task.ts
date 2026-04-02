@@ -158,7 +158,7 @@ export function remove(name: TaskName): void {
 }
 
 /** Replaces the entire pipeline. */
-export function setPipeline(tasks: string[]): void {
+export function setPipeline(tasks: TaskName[]): void {
   _pipeline = [...tasks]
 }
 
