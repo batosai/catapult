@@ -1,10 +1,7 @@
 import type { Host, DeployContext, Paths, TaskName } from './types.ts'
-import { q, getPaths, ssh } from './utils.ts'
-import { colors } from '@poppinss/cliui'
+import { q, getPaths, ssh, yellow, blue, gray } from './utils.ts'
 
-export const yellow = (s: string) => colors.ansi().yellow(s)
-export const blue = (s: string) => colors.ansi().blue(s)
-export const gray = (s: string) => colors.ansi().dim(s)
+export { yellow, blue, gray }
 
 export type TaskFn = () => void | Promise<void>
 

@@ -5,6 +5,10 @@ import { createHash } from 'node:crypto'
 import { colors } from '@poppinss/cliui'
 import type { Host, Paths } from './types.ts'
 
+export const yellow = (s: string) => colors.ansi().yellow(s)
+export const blue = (s: string) => colors.ansi().blue(s)
+export const gray = (s: string) => colors.ansi().dim(s)
+
 export function q(value: unknown): string {
   return `'${String(value).replace(/'/g, `'\\''`)}'`
 }
@@ -45,7 +49,7 @@ export async function ssh(
   command: string,
   opts?: { quiet?: boolean; verbose?: boolean }
 ) {
-  if (opts?.verbose && !opts?.quiet) console.log(colors.ansi().yellow(`    $ ${command}`))
+  if (opts?.verbose && !opts?.quiet) console.log(yellow(`    $ ${command}`))
   const b64 = Buffer.from(command).toString('base64')
   const args = [...sshControlArgs(host), ...resolveSshArgs(host)]
 
