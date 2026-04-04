@@ -1,5 +1,5 @@
-import { createRequire } from 'module'
 import type {} from '../src/types.ts'
+import { createRequire } from 'module'
 import { task, after, onStatus, bin, getContext, getPaths, ssh, q } from '../index.ts'
 
 declare module '../src/types.ts' {

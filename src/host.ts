@@ -1,5 +1,4 @@
 import type { Host, DeployContext, Hooks, HookContext } from './types.ts'
-
 import { q, getPaths, ssh, sleep } from './utils.ts'
 import { task, run, getContext, runTask, getPipeline, get, blue, gray } from './task.ts'
 

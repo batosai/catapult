@@ -1,8 +1,8 @@
+import type { Host } from '../src/types.ts'
 import { execa } from 'execa'
 import { getCtx } from '../src/ctx.ts'
 import { resolveSshArgs, sshControlArgs } from '../src/utils.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
-import type { Host } from '../src/types.ts'
 
 export default class Ssh extends BaseDeployCommand {
   static commandName = 'ssh'

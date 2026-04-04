@@ -1,5 +1,5 @@
-import { BaseCommand, flags } from '@adonisjs/ace'
 import type { Host } from './types.ts'
+import { BaseCommand, flags } from '@adonisjs/ace'
 import { getCtx } from './ctx.ts'
 
 export abstract class BaseDeployCommand extends BaseCommand {

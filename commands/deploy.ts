@@ -5,6 +5,7 @@ import { BaseDeployCommand } from '../src/base_command.ts'
 
 export default class Deploy extends BaseDeployCommand {
   static commandName = 'deploy'
+  static aliases = ['dep']
   static description = 'Deploy to servers'
 
   @flags.string({ description: 'Override the branch to deploy' })
@@ -43,6 +44,6 @@ export default class Deploy extends BaseDeployCommand {
     }
     if (ctx.hooks.afterDeploy) await ctx.hooks.afterDeploy({ hosts })
 
-    this.logger.action('rollout').succeeded()
+    this.logger.action('success').succeeded()
   }
 }

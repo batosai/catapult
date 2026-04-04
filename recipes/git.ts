@@ -1,5 +1,5 @@
-import { $ } from 'execa'
 import type {} from '../src/types.ts'
+import { $ } from 'execa'
 import { task, after, getContext, isVerbose, yellow, q } from '../index.ts'
 import { ssh } from '../src/utils.ts'
 
