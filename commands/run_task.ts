@@ -1,7 +1,7 @@
 import { args } from '@adonisjs/ace'
 import { Context } from '../src/context.ts'
 import { hasTask, runTask, getTasks } from '../src/task.ts'
-import { getCurrentRelease } from '../src/host.ts'
+import { getCurrentRelease } from '../src/deployer.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
 
 export default class RunTask extends BaseDeployCommand {

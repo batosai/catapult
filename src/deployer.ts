@@ -1,30 +1,14 @@
 import type { Host, DeployContext, Hooks, HookContext } from './types.ts'
-import { q, getPaths, ssh, sleep } from './utils.ts'
-import { task, run, runTask } from './task.ts'
-import type { TaskContext } from './task.ts'
+import { q, getPaths, ssh, blue, gray, elapsed } from './utils.ts'
+import { runTask } from './task.ts'
 import { get } from './store.ts'
-import { blue, gray } from './utils.ts'
 import { getPipeline } from './pipeline.ts'
-
-declare module './types.ts' {
-  interface TaskRegistry {
-    'deploy:lock': true
-    'deploy:release': true
-    'deploy:update_code': true
-    'deploy:shared': true
-    'deploy:publish': true
-    'deploy:log_revision': true
-    'deploy:healthcheck': true
-    'deploy:unlock': true
-    'deploy:cleanup': true
-  }
-}
 
 // ---------------------------------------------------------------------------
 // Hook runner
 // ---------------------------------------------------------------------------
 
-export async function runHook(
+async function runHook(
   ctx: DeployContext,
   name: keyof Hooks,
   context: HookContext = {}
@@ -35,90 +19,7 @@ export async function runHook(
 }
 
 // ---------------------------------------------------------------------------
-// Built-in tasks
-// ---------------------------------------------------------------------------
-
-task('deploy:lock', async ({ host, deployCtx, paths }: TaskContext) => {
-  try {
-    await ssh(
-      host,
-      `
-      set -e
-      if [ -f ${q(paths.lock)} ]; then
-        echo "Deploy lock already present: ${paths.lock}" >&2
-        exit 1
-      fi
-      echo ${q(deployCtx.release)} > ${q(paths.lock)}
-    `,
-      { quiet: true }
-    )
-  } catch (error) {
-    throw new Error((error as any).stderr?.trim() || (error as Error).message)
-  }
-})
-
-task('deploy:unlock', async ({ host, paths }: TaskContext) => {
-  await ssh(
-    host,
-    `
-    set +e
-    rm -f ${q(paths.lock)}
-    true
-  `
-  )
-})
-
-task('deploy:release', () => {
-  run('mkdir -p {{release_path}}')
-})
-
-task('deploy:update_code', async () => {})
-
-task('deploy:shared', () => {
-  const dirs: string[] = get('shared_dirs', [])
-  const files: string[] = get('shared_files', [])
-
-  for (const dir of dirs) {
-    run(`rm -rf {{release_path}}/${dir}`)
-    run(`ln -sfn {{shared_path}}/${dir} {{release_path}}/${dir}`)
-  }
-
-  for (const file of files) {
-    run(`rm -f {{release_path}}/${file}`)
-    run(`ln -sfn {{shared_path}}/${file} {{release_path}}/${file}`)
-  }
-})
-
-task('deploy:publish', () => {
-  run('ln -sfn {{release_path}} {{current_path}}')
-})
-
-task('deploy:log_revision', async () => {})
-
-task('deploy:healthcheck', async ({ deployCtx, host }: TaskContext) => {
-  await healthcheckOrThrow(deployCtx, host)
-})
-
-task('deploy:cleanup', async ({ deployCtx, host, paths }: TaskContext) => {
-  await ssh(
-    host,
-    `
-    set -e
-    [ -d ${q(paths.releases)} ] || exit 0
-    cd ${q(paths.releases)}
-
-    count=$(ls -1dt */ 2>/dev/null | wc -l | tr -d ' ')
-    if [ "$count" -le ${deployCtx.config.keepReleases} ]; then
-      exit 0
-    fi
-
-    ls -1dt */ | tail -n +$(( ${deployCtx.config.keepReleases} + 1 )) | xargs -r rm -rf
-  `
-  )
-})
-
-// ---------------------------------------------------------------------------
-// Internal operations
+// Host operations
 // ---------------------------------------------------------------------------
 
 export async function setupHost(ctx: DeployContext, host: Host): Promise<void> {
@@ -150,37 +51,6 @@ export async function setupHost(ctx: DeployContext, host: Host): Promise<void> {
   )
 }
 
-async function healthcheckOrThrow(ctx: DeployContext, host: Host): Promise<void> {
-  console.log(`==> ${blue(`[${host.name}]`)} healthcheck ${host.healthcheckUrl}`)
-
-  if (ctx.config.healthcheckRetries) {
-    for (let i = 1; i <= ctx.config.healthcheckRetries; i += 1) {
-      try {
-        await ssh(
-          host,
-          `
-        set -e
-        curl --fail --silent --show-error --max-time 5 ${q(host.healthcheckUrl)} >/dev/null
-      `
-        )
-        console.log(
-          `==> ${blue(`[${host.name}]`)} healthcheck OK (${i}/${ctx.config.healthcheckRetries})`
-        )
-        return
-      } catch {
-        console.log(
-          `==> ${blue(`[${host.name}]`)} healthcheck failed (${i}/${ctx.config.healthcheckRetries})`
-        )
-        if (i < ctx.config.healthcheckRetries) {
-          await sleep(ctx.config.healthcheckDelayMs || 3_000)
-        }
-      }
-    }
-  }
-
-  throw new Error(`[${host.name}] healthcheck failed: ${host.healthcheckUrl}`)
-}
-
 export async function getCurrentRelease(ctx: DeployContext, host: Host): Promise<string | null> {
   const paths = getPaths(host.deployPath, ctx.release)
 
@@ -200,10 +70,7 @@ export async function getCurrentRelease(ctx: DeployContext, host: Host): Promise
   }
 }
 
-export async function getPreviousReleaseName(
-  ctx: DeployContext,
-  host: Host
-): Promise<string | null> {
+async function getPreviousReleaseName(ctx: DeployContext, host: Host): Promise<string | null> {
   const paths = getPaths(host.deployPath, ctx.release)
   const currentRelease = await getCurrentRelease(ctx, host)
 
@@ -250,17 +117,8 @@ export async function rollbackHost(ctx: DeployContext, host: Host): Promise<void
   }
 
   if (getPipeline().includes('deploy:healthcheck')) {
-    await healthcheckOrThrow(ctx, host)
+    await runTask('deploy:healthcheck', ctx, host)
   }
-}
-
-function elapsed(ms: number): string {
-  const total = Math.round(ms / 1000)
-  const m = Math.floor(total / 60)
-    .toString()
-    .padStart(2, '0')
-  const s = (total % 60).toString().padStart(2, '0')
-  return `${m}:${s}`
 }
 
 export async function deployHost(ctx: DeployContext, host: Host): Promise<void> {

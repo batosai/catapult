@@ -1,5 +1,5 @@
 import { Context } from '../src/context.ts'
-import { setupHost } from '../src/host.ts'
+import { setupHost } from '../src/deployer.ts'
 import { hooks } from '../src/pipeline/hooks.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
 

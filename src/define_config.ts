@@ -1,5 +1,6 @@
 import type { Config } from './types.ts'
 import { Context } from './context.ts'
+import './defaults.ts'
 
 export async function defineConfig(config: Config): Promise<void> {
   const release = new Date().toISOString().replace(/[:.]/g, '-')

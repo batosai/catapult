@@ -1,5 +1,5 @@
 import { Context } from '../src/context.ts'
-import { getCurrentRelease } from '../src/host.ts'
+import { getCurrentRelease } from '../src/deployer.ts'
 import { bin } from '../src/task.ts'
 import { getPipeline } from '../src/pipeline.ts'
 import { hooks } from '../src/pipeline/hooks.ts'

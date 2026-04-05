@@ -1,7 +1,7 @@
 import type {} from '../src/types.ts'
 import { $ } from 'execa'
-import { type TaskContext, task, after, isVerbose, yellow, q } from '../index.ts'
-import { ssh } from '../src/utils.ts'
+import { type TaskContext, task, after, isVerbose } from '../index.ts'
+import { ssh, yellow, q } from '../src/utils.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {

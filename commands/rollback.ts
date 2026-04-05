@@ -1,5 +1,5 @@
 import { Context } from '../src/context.ts'
-import { rollbackHost } from '../src/host.ts'
+import { rollbackHost } from '../src/deployer.ts'
 import { runTask } from '../src/task.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
 

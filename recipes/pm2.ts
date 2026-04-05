@@ -1,6 +1,7 @@
 import type {} from '../src/types.ts'
 import { createRequire } from 'module'
-import { type TaskContext, task, after, onStatus, bin, getPaths, ssh, q } from '../index.ts'
+import { type TaskContext, task, after, onStatus, bin } from '../index.ts'
+import { getPaths, ssh, q } from '../src/utils.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {

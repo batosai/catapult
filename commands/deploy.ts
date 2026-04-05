@@ -1,6 +1,6 @@
 import { flags } from '@adonisjs/ace'
 import { Context } from '../src/context.ts'
-import { deployHost } from '../src/host.ts'
+import { deployHost } from '../src/deployer.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
 
 export default class Deploy extends BaseDeployCommand {

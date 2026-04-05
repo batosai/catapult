@@ -67,7 +67,7 @@ export function sshControlArgs(host: Host): string[] {
   const target = typeof host.ssh === 'string' ? host.ssh : `${host.ssh.user}@${host.ssh.host}`
   const hash = createHash('sha1').update(target).digest('hex').slice(0, 8)
   const socket = join(tmpdir(), `cata-${hash}.sock`)
-  return ['-o', 'ControlMaster=auto', '-o', `ControlPath=${socket}`, '-o', 'ControlPersist=60']
+  return ['-o', 'ControlMaster=auto', '-o', `ControlPath=${socket}`, '-o', 'ControlPersist=300']
 }
 
 /** Returns the -e flag value for rsync, reusing the SSH multiplexing socket. */
@@ -91,4 +91,13 @@ export async function ssh(
 
 export async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+export function elapsed(ms: number): string {
+  const total = Math.round(ms / 1000)
+  const m = Math.floor(total / 60)
+    .toString()
+    .padStart(2, '0')
+  const s = (total % 60).toString().padStart(2, '0')
+  return `${m}:${s}`
 }

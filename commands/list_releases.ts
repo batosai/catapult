@@ -1,5 +1,5 @@
 import { Context } from '../src/context.ts'
-import { getCurrentRelease } from '../src/host.ts'
+import { getCurrentRelease } from '../src/deployer.ts'
 import { q, getPaths, ssh } from '../src/utils.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
 
