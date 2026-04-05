@@ -44,11 +44,14 @@ export default defineConfig({
         {
           text: 'Guide',
           items: [
+            { text: 'Motivation', link: '/guide/motivation' },
             { text: 'Getting Started', link: '/guide/getting-started' },
             { text: 'Pipeline', link: '/guide/pipeline' },
             { text: 'Recipes', link: '/guide/recipes' },
             { text: 'Creating a Recipe', link: '/guide/creating-recipes' },
             { text: 'Hooks', link: '/guide/hooks' },
+            { text: 'API Reference', link: '/guide/api' },
+            { text: 'Changelog', link: '/guide/changelog' },
           ],
         },
       ],

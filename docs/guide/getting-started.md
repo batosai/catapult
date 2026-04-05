@@ -4,6 +4,10 @@ description: Install Catapult, configure your hosts and deploy your Node.js appl
 
 # Getting Started
 
+:::warning Alpha
+`@catapultjs/deploy` is currently in alpha. Its API may change between minor releases until it reaches a stable version. Pin the package version in your `package.json` to avoid unexpected breaking changes during updates.
+:::
+
 ## Installation
 
 Run the following command at the root of your project:
@@ -12,7 +16,7 @@ Run the following command at the root of your project:
 npx @catapultjs/deploy init
 ```
 
-This creates a `deploy.ts` configuration file and installs `@catapultjs/deploy` as a dev dependency. Once installed, the `cata` CLI is available:
+This creates a `deploy.(js|ts)` configuration file and installs `@catapultjs/deploy` as a dev dependency. Once installed, the `cata` CLI is available:
 
 ```bash
 npx cata deploy

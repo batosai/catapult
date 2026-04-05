@@ -1,10 +1,14 @@
 ---
-description: Learn how to create custom Catapult recipes — reusable TypeScript modules that register tasks and insert them into the deployment pipeline.
+description: Learn how to create custom Catapult recipes — reusable JavaScript or TypeScript modules that register tasks and insert them into the deployment pipeline.
 ---
 
 # Creating a Recipe
 
-A recipe is a regular TypeScript file that registers tasks and inserts them into the pipeline upon import.
+:::warning Alpha
+`@catapultjs/deploy` is currently in alpha. Its API may change between minor releases until it reaches a stable version. Pin the package version in your `package.json` to avoid unexpected breaking changes during updates.
+:::
+
+A recipe is a regular JavaScript or TypeScript file that registers tasks and inserts them into the pipeline upon import.
 
 ## Basic structure
 

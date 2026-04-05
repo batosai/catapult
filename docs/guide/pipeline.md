@@ -4,83 +4,49 @@ description: Understand the Catapult deployment pipeline — the ordered sequenc
 
 # Pipeline
 
-The pipeline is the sequence of tasks executed during a deployment.
+:::warning Alpha
+`@catapultjs/deploy` is currently in alpha. Its API may change between minor releases until it reaches a stable version. Pin the package version in your `package.json` to avoid unexpected breaking changes during updates.
+:::
 
-## Default pipeline (without recipes)
+The pipeline is the ordered sequence of tasks executed on each server during a deployment.
 
-```
-deploy:lock → deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:log_revision → deploy:healthcheck → deploy:unlock → deploy:cleanup
-```
-
-## With `git` recipe
-
-The `git` recipe overrides `deploy:update_code` to clone from a git repository and adds `git:check` after `deploy:lock`:
-
-```
-deploy:lock → git:check → deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:log_revision → deploy:healthcheck → deploy:unlock → deploy:cleanup
-```
-
-## With `git` + `adonisjs` + `pm2` recipes
-
-```
-deploy:lock → git:check → deploy:release → deploy:update_code → deploy:shared → adonisjs:install → adonisjs:build → adonisjs:migrate → deploy:publish → deploy:log_revision → pm2:start → pm2:save → deploy:healthcheck → deploy:unlock → deploy:cleanup
-```
-
-## With `rsync` recipe
-
-The `rsync` recipe overrides `deploy:update_code` to transfer files via rsync. It removes `git:check` from the pipeline, so `branch` is no longer required on hosts:
+## Default pipeline
 
 ```
 deploy:lock → deploy:release → deploy:update_code → deploy:shared → deploy:publish → deploy:log_revision → deploy:healthcheck → deploy:unlock → deploy:cleanup
 ```
 
-## Task descriptions
+| Task                  | Description                                           |
+| --------------------- | ----------------------------------------------------- |
+| `deploy:lock`         | Creates a lock file to prevent concurrent deployments |
+| `deploy:release`      | Creates the release directory                         |
+| `deploy:update_code`  | Transfers code to the server                          |
+| `deploy:shared`       | Creates symlinks for `shared_dirs` and `shared_files` |
+| `deploy:publish`      | Switches the `current` symlink to the new release     |
+| `deploy:log_revision` | Records the deployment in `revisions.log`             |
+| `deploy:healthcheck`  | Checks that the application is responding             |
+| `deploy:unlock`       | Removes the lock file (also called on failure)        |
+| `deploy:cleanup`      | Removes old releases                                  |
 
-| Task                  | Description                                             |
-| --------------------- | ------------------------------------------------------- |
-| `deploy:lock`         | Creates a lock file to prevent concurrent deployments   |
-| `git:check`           | Verifies the branch exists on the remote (`git` recipe) |
-| `deploy:release`      | Creates the release directory                           |
-| `deploy:update_code`  | Transfers code to the server (git clone or rsync)       |
-| `deploy:shared`       | Creates symlinks for `shared_dirs` and `shared_files`   |
-| `adonisjs:install`    | Installs dependencies (frozen lockfile)                 |
-| `adonisjs:build`      | Compiles the application                                |
-| `adonisjs:migrate`    | Runs migrations                                         |
-| `deploy:publish`      | Switches the `current` symlink to the new release       |
-| `deploy:log_revision` | Records the deployment in `revisions.log`               |
-| `pm2:start`           | Starts or reloads the application via PM2               |
-| `pm2:save`            | Persists the PM2 process list                           |
-| `deploy:healthcheck`  | Checks that the application is responding               |
-| `deploy:unlock`       | Removes the lock file (also called on failure)          |
-| `deploy:cleanup`      | Removes old releases                                    |
+`deploy:healthcheck` is automatically removed from the pipeline if no host defines a `healthcheckUrl`.
 
-## Adding a task to the pipeline
+## Adding a task
+
+Use `after()` or `before()` to insert a task relative to an existing one:
 
 ```typescript
-import { defineConfig, task, run, after, before, remove } from '@catapultjs/deploy'
-import '@catapultjs/deploy/recipes/adonisjs'
-import '@catapultjs/deploy/recipes/pm2'
+import { task, cd, run, after, before } from '@catapultjs/deploy'
 
 task('cache:clear', () => {
-  run('cd {{current_path}} && node ace cache:clear')
+  cd('{{current_path}}')
+  run('node ace cache:clear')
 })
 
-after('adonisjs:migrate', 'cache:clear')
-
-await defineConfig({ ... })
+after('deploy:publish', 'cache:clear')
+before('deploy:cleanup', 'cache:clear')
 ```
 
-Available functions:
-
-```typescript
-after('adonisjs:migrate', 'my-task') // insert after
-before('deploy:publish', 'my-task') // insert before
-remove('deploy:healthcheck') // remove from pipeline
-```
-
-## Removing a task from the pipeline
-
-Use `remove()` to exclude a task from the pipeline:
+## Removing a task
 
 ```typescript
 import { remove } from '@catapultjs/deploy'
@@ -97,12 +63,7 @@ setPipeline([
   'deploy:release',
   'deploy:update_code',
   'deploy:shared',
-  'adonisjs:install',
-  'adonisjs:build',
   'deploy:publish',
-  'pm2:start',
-  'pm2:save',
-  'deploy:healthcheck',
   'deploy:unlock',
   'deploy:cleanup',
 ])
@@ -110,16 +71,14 @@ setPipeline([
 
 ## Overriding a task
 
-Redefining a task replaces its implementation. Place it before `defineConfig`.
+Redefining a task replaces its implementation. Place it before `defineConfig`:
 
 ```typescript
 import { defineConfig, task, cd, run } from '@catapultjs/deploy'
-import '@catapultjs/deploy/recipes/adonisjs'
 
-task('adonisjs:build', () => {
+task('deploy:update_code', () => {
   cd('{{release_path}}')
-  run('npm ci')
-  run('npm run build:prod')
+  run('rsync ...')
 })
 
 await defineConfig({ ... })
@@ -127,7 +86,7 @@ await defineConfig({ ... })
 
 ## Async task
 
-For operations that require more than a simple SSH command, use an async function and destructure the `TaskContext` parameter:
+For operations that require more than SSH commands, use an async function and destructure the `TaskContext` parameter:
 
 ```typescript
 import { type TaskContext, task, after } from '@catapultjs/deploy'
@@ -144,10 +103,10 @@ after('deploy:healthcheck', 'notify')
 
 ## Running a task manually
 
-Any registered task — whether built-in, added by a recipe, or defined in `deploy.ts` — can be run directly from the terminal.
+Any registered task can be run directly from the terminal:
 
 ```bash
-npx cata task adonisjs:migrate
+npx cata task deploy:update_code
 npx cata task cache:clear --host staging
 ```
 
@@ -156,14 +115,14 @@ npx cata task cache:clear --host staging
 Available in `cd()` and `run()`:
 
 ::: v-pre
-| Variable | Value |
-| ------------------- | --------------------------------------------------- |
-| `{{release_path}}` | `/base/releases/<release>` |
-| `{{current_path}}` | `/base/current` |
-| `{{shared_path}}` | `/base/shared` |
-| `{{releases_path}}` | `/base/releases` |
-| `{{base_path}}` | `/base` |
-| `{{release}}` | Release name (e.g. `2024-01-15T10-30-00-000Z`) |
+| Variable            | Value                                          |
+| ------------------- | ---------------------------------------------- |
+| `{{release_path}}`  | `/base/releases/<release>`                     |
+| `{{current_path}}`  | `/base/current`                                |
+| `{{shared_path}}`   | `/base/shared`                                 |
+| `{{releases_path}}` | `/base/releases`                               |
+| `{{base_path}}`     | `/base`                                        |
+| `{{release}}`       | Release name (e.g. `2024-01-15T10-30-00-000Z`) |
 :::
 
 Where `/base` is the `deployPath` defined on the host.

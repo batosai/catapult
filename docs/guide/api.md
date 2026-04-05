@@ -1,0 +1,329 @@
+---
+description: Complete API reference for @catapultjs/deploy — all exported functions, types and template variables.
+---
+
+# API Reference
+
+:::warning Alpha
+`@catapultjs/deploy` is currently in alpha. Its API may change between minor releases until it reaches a stable version. Pin the package version in your `package.json` to avoid unexpected breaking changes during updates.
+:::
+
+All functions are exported from `@catapultjs/deploy`.
+
+## Configuration
+
+### `defineConfig(config)`
+
+Initialises the deployment configuration. Must be called (with `await`) in your `deploy.ts`.
+
+```typescript
+await defineConfig({
+  keepReleases: 5,
+  hosts: [
+    {
+      name: 'production',
+      ssh: 'deploy@example.com',
+      deployPath: '/home/deploy/myapp',
+      branch: 'main',
+    },
+  ],
+})
+```
+
+**Options**
+
+| Option                | Type              | Description                                         |
+| --------------------- | ----------------- | --------------------------------------------------- |
+| `hosts`               | `Host[]`          | List of servers to deploy to                        |
+| `keepReleases`        | `number`          | Number of releases to keep (default: `5`)           |
+| `repository`          | `string`          | Git repository URL (auto-detected from origin)      |
+| `hooks`               | `Hooks`           | Lifecycle hooks (`beforeDeploy`, `afterDeploy`, …)  |
+| `verbose`             | `boolean`         | Print SSH commands in the terminal (default: `true`) |
+
+---
+
+## Task DSL
+
+These functions are used inside task callbacks to build the SSH command sequence.
+
+### `task(name, fn)`
+
+Registers a task. If a task with the same name already exists, it is replaced.
+
+```typescript
+import { task, cd, run } from '@catapultjs/deploy'
+
+task('my:build', () => {
+  cd('{{release_path}}')
+  run('npm ci')
+  run('npm run build')
+})
+```
+
+The callback receives a [`TaskContext`](#taskcontext) as its first argument:
+
+```typescript
+task('my:build', async ({ host, paths, deployCtx }) => {
+  // ...
+})
+```
+
+---
+
+### `cd(path)`
+
+Sets the working directory for subsequent `run()` calls. Supports [template variables](#template-variables).
+
+```typescript
+cd('{{release_path}}')
+```
+
+Must be called inside a task callback.
+
+---
+
+### `run(command)`
+
+Queues a shell command to run on the server. Supports [template variables](#template-variables).
+All queued commands are sent in a single SSH session at the end of the task, prefixed with `set -e`.
+
+```typescript
+run('npm ci')
+run('npm run build')
+```
+
+Must be called inside a task callback.
+
+---
+
+### `bin(name)`
+
+Resolves a binary path. Checks the current host's `bin` config first, then falls back to the binary name.
+
+```typescript
+task('my:build', () => {
+  cd('{{release_path}}')
+  run(`${bin('node')} my-script.js`)
+})
+```
+
+Per-host binary paths are configured in `defineConfig`:
+
+```typescript
+{
+  name: 'production',
+  ssh: 'deploy@example.com',
+  deployPath: '/home/deploy/myapp',
+  bin: {
+    node: '/home/deploy/.nvm/versions/node/v22/bin/node',
+  },
+}
+```
+
+---
+
+### `isVerbose()`
+
+Returns `true` if `verbose: true` is set in the config. Useful for conditional logging inside async tasks.
+
+```typescript
+import { task, isVerbose } from '@catapultjs/deploy'
+
+task('my:task', async ({ host }) => {
+  if (isVerbose()) console.log(`[${host.name}] doing something`)
+})
+```
+
+---
+
+## Pipeline
+
+### `getPipeline()`
+
+Returns a copy of the current pipeline as an array of task names.
+
+```typescript
+const pipeline = getPipeline()
+// ['deploy:lock', 'deploy:release', ...]
+```
+
+---
+
+### `setPipeline(tasks)`
+
+Replaces the entire pipeline.
+
+```typescript
+setPipeline([
+  'deploy:release',
+  'deploy:update_code',
+  'deploy:shared',
+  'deploy:publish',
+  'deploy:unlock',
+  'deploy:cleanup',
+])
+```
+
+---
+
+### `before(existing, newTask)`
+
+Inserts `newTask` immediately before `existing` in the pipeline. Throws if `existing` is not found.
+
+```typescript
+before('deploy:publish', 'my:task')
+```
+
+---
+
+### `after(existing, newTask)`
+
+Inserts `newTask` immediately after `existing` in the pipeline. Throws if `existing` is not found.
+
+```typescript
+after('deploy:publish', 'my:task')
+```
+
+---
+
+### `remove(name)`
+
+Removes a task from the pipeline. Throws if the task is not found.
+
+```typescript
+remove('deploy:log_revision')
+```
+
+---
+
+### `onSetup(fn)`
+
+Registers a callback to run during `cata deploy:setup`, after the base directories are created. Useful for creating shared directories or files specific to your application.
+
+```typescript
+import { onSetup } from '@catapultjs/deploy'
+import { ssh, q, getPaths } from '@catapultjs/deploy/utils'
+
+onSetup(async (ctx, host) => {
+  const paths = getPaths(host.deployPath, ctx.release)
+  await ssh(host, `mkdir -p ${q(paths.shared + '/uploads')}`)
+})
+```
+
+---
+
+### `onStatus(fn)`
+
+Registers a callback to run during `cata status`. Useful for displaying additional information such as a process manager version or queue state.
+
+```typescript
+import { onStatus } from '@catapultjs/deploy'
+import { ssh } from '@catapultjs/deploy/utils'
+
+onStatus(async (_ctx, host) => {
+  const { stdout } = await ssh(host, `set +e\nmy-service --version || true`)
+  console.log(`my-service ${stdout.trim() || 'unavailable'}`)
+})
+```
+
+---
+
+## Store
+
+Key/value store for sharing configuration between `deploy.ts` and recipes.
+
+**Reserved keys**
+
+| Key               | Type       | Default | Used by                                    |
+| ----------------- | ---------- | ------- | ------------------------------------------ |
+| `package_manager` | `string`   | `'npm'` | `pm()`, `pmInstall()`, `pmInstallProd()`   |
+| `shared_dirs`     | `string[]` | `[]`    | `deploy:shared`                            |
+| `shared_files`    | `string[]` | `[]`    | `deploy:shared`                            |
+| `writable_dirs`   | `string[]` | `[]`    | `deploy:setup` (via `onSetup`)             |
+
+### `set(key, value)`
+
+Stores a value under the given key.
+
+```typescript
+import { set } from '@catapultjs/deploy'
+
+set('package_manager', 'pnpm')
+set('shared_dirs', ['storage', 'logs'])
+```
+
+---
+
+### `get(key, defaultValue?)`
+
+Retrieves a value from the store. Returns `defaultValue` if the key is not set.
+
+```typescript
+import { get } from '@catapultjs/deploy'
+
+const dirs = get<string[]>('shared_dirs', [])
+const pm = get('package_manager', 'npm')
+```
+
+---
+
+## Package manager
+
+### `pm()`
+
+Returns the current package manager binary (`npm`, `pnpm` or `yarn`). Reads the `package_manager` store key, defaults to `npm`.
+
+```typescript
+run(`${pm()} run build`)
+```
+
+---
+
+### `pmInstall()`
+
+Returns the install command with frozen lockfile for the current package manager.
+
+| `package_manager` | Command                          |
+| ----------------- | -------------------------------- |
+| `npm`             | `npm ci`                         |
+| `pnpm`            | `pnpm install --frozen-lockfile` |
+| `yarn`            | `yarn install --frozen-lockfile` |
+
+```typescript
+run(pmInstall())
+```
+
+---
+
+### `pmInstallProd()`
+
+Returns the production-only install command for the current package manager.
+
+| `package_manager` | Command                     |
+| ----------------- | --------------------------- |
+| `npm`             | `npm install --omit=dev`    |
+| `pnpm`            | `pnpm install --prod`       |
+| `yarn`            | `yarn install --production` |
+
+```typescript
+run(pmInstallProd())
+```
+
+---
+
+## Template variables
+
+Available in `cd()` and `run()`:
+
+::: v-pre
+| Variable            | Value                                          |
+| ------------------- | ---------------------------------------------- |
+| `{{release_path}}`  | `/base/releases/<release>`                     |
+| `{{current_path}}`  | `/base/current`                                |
+| `{{shared_path}}`   | `/base/shared`                                 |
+| `{{releases_path}}` | `/base/releases`                               |
+| `{{base_path}}`     | `/base`                                        |
+| `{{release}}`       | Release name (e.g. `2024-01-15T10-30-00-000Z`) |
+:::
+
+Where `/base` is the `deployPath` defined on the host.

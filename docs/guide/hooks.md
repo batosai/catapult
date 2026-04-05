@@ -4,6 +4,10 @@ description: Use Catapult hooks to run custom logic before or after a deployment
 
 # Hooks
 
+:::warning Alpha
+`@catapultjs/deploy` is currently in alpha. Its API may change between minor releases until it reaches a stable version. Pin the package version in your `package.json` to avoid unexpected breaking changes during updates.
+:::
+
 Hooks are global callbacks that run around the deployment, outside the pipeline.
 
 ```typescript
