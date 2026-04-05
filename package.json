@@ -57,6 +57,8 @@
     "@adonisjs/eslint-config": "^3.0.0",
     "@adonisjs/prettier-config": "^1.4.5",
     "@adonisjs/tsconfig": "^2.0.0",
+    "@japa/assert": "^4.2.0",
+    "@japa/runner": "^5.3.0",
     "@types/node": "^24.12.0",
     "eslint": "^10.1.0",
     "prettier": "^3.8.1",
