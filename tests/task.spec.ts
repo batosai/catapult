@@ -9,7 +9,7 @@ function makeDeployCtx(): DeployContext {
     config: {
       keepReleases: 5,
       hosts: [],
-      verbose: false,
+      verbose: 0,
     },
   }
 }
@@ -101,16 +101,16 @@ test.group('task — DSL', () => {
     assert.equal(resolved, '/home/deploy/.nvm/versions/node/v22/bin/node')
   })
 
-  test('isVerbose returns false when no context is set', ({ assert }) => {
-    assert.isFalse(isVerbose())
+  test('isVerbose returns 0 when no context is set', ({ assert }) => {
+    assert.equal(isVerbose(), 0)
   })
 
   test('isVerbose returns the config value when inside a task', async ({ assert }) => {
-    let result: boolean | undefined
+    let result: 0 | 1 | 2 | undefined
     task('test:verbose_ctx', async () => { result = isVerbose() })
     const ctx = makeDeployCtx()
-    ctx.config.verbose = true
+    ctx.config.verbose = 2
     await runTask('test:verbose_ctx', ctx, makeHost())
-    assert.isTrue(result)
+    assert.equal(result, 2)
   })
 })

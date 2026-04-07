@@ -3,6 +3,7 @@ import { Context } from '../src/context.ts'
 import { deployHost } from '../src/deployer.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
 
+
 export default class Deploy extends BaseDeployCommand {
   static commandName = 'deploy'
   static aliases = ['dep']
@@ -10,6 +11,9 @@ export default class Deploy extends BaseDeployCommand {
 
   @flags.string({ description: 'Override the branch to deploy' })
   declare branch: string | undefined
+
+  @flags.boolean({ alias: 'v', description: 'Verbose output (-v level 1, -vv level 2)' })
+  declare verbose: boolean
 
   async run() {
     const ctx = Context.get()

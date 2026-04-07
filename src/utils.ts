@@ -77,7 +77,7 @@ export function rsyncSshFlag(host: Host): string {
   return `ssh${port} ${controlOpts}`
 }
 
-export async function ssh(
+export function ssh(
   host: Host,
   command: string,
   opts?: { quiet?: boolean; verbose?: boolean }

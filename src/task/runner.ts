@@ -36,8 +36,8 @@ export class TaskRunner {
     return this.#ctx?.host.bin?.[name] ?? name
   }
 
-  isVerbose(): boolean {
-    return this.#ctx?.deployCtx.config.verbose ?? false
+  isVerbose(): 0 | 1 | 2 {
+    return this.#ctx?.deployCtx.config.verbose ?? 0
   }
 
   resolve(str: string): string {
@@ -55,9 +55,12 @@ export class TaskRunner {
   async flush(): Promise<void> {
     if (!this.#ctx || this.#commands.length === 0) return
     const cmds = this.#commands.splice(0)
-    if (this.#ctx.deployCtx.config.verbose) {
+    const verbose = this.#ctx.deployCtx.config.verbose ?? 0
+    if (verbose >= 1) {
       for (const cmd of cmds) console.log(yellow(`    $ ${cmd}`))
     }
-    await ssh(this.#ctx.host, ['set -e', ...cmds].join('\n'))
+    const subprocess = ssh(this.#ctx.host, ['set -e', ...cmds].join('\n'))
+    if (verbose >= 2) subprocess.stdout?.pipe(process.stdout)
+    await subprocess
   }
 }

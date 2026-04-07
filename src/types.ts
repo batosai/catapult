@@ -51,7 +51,7 @@ export interface Config {
   hosts: Host[]
 
   hooks?: Hooks
-  verbose?: boolean
+  verbose?: 0 | 1 | 2
 }
 
 export interface DeployContext {

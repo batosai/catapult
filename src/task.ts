@@ -40,6 +40,6 @@ export function bin(name: string): string {
   return runner.bin(name)
 }
 
-export function isVerbose(): boolean {
+export function isVerbose(): 0 | 1 | 2 {
   return runner.isVerbose()
 }
