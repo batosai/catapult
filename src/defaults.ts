@@ -1,6 +1,6 @@
-import { q, ssh, blue, sleep } from './utils.ts'
-import { task, run } from './task.ts'
-import type { TaskContext } from './task.ts'
+import { $ } from 'execa'
+import { q, ssh, yellow, blue, sleep } from './utils.ts'
+import { type TaskContext, task, run, isVerbose } from './task.ts'
 import { get } from './store.ts'
 
 declare module './types.ts' {
@@ -62,13 +62,15 @@ task('deploy:shared', () => {
   const files: string[] = get('shared_files', [])
 
   for (const dir of dirs) {
-    run(`rm -rf {{release_path}}/${dir}`)
-    run(`ln -sfn {{shared_path}}/${dir} {{release_path}}/${dir}`)
+    const d = dir.replace(/^\//, '')
+    run(`rm -rf {{release_path}}/${d}`)
+    run(`ln -sfn {{shared_path}}/${d} {{release_path}}/${d}`)
   }
 
   for (const file of files) {
-    run(`rm -f {{release_path}}/${file}`)
-    run(`ln -sfn {{shared_path}}/${file} {{release_path}}/${file}`)
+    const f = file.replace(/^\//, '')
+    run(`rm -f {{release_path}}/${f}`)
+    run(`ln -sfn {{shared_path}}/${f} {{release_path}}/${f}`)
   }
 })
 
@@ -76,7 +78,23 @@ task('deploy:publish', () => {
   run('ln -sfn {{release_path}} {{current_path}}')
 })
 
-task('deploy:log_revision', async () => {})
+task('deploy:log_revision', async ({ host, deployCtx }: TaskContext) => {
+  const branch = typeof host.branch === 'object' ? host.branch.name : (host.branch ?? 'unknown')
+  let commit = 'unknown'
+  let user = 'unknown'
+
+  try {
+    if (isVerbose()) console.log(yellow('    $ git rev-parse HEAD'))
+    commit = (await $`git rev-parse HEAD`).stdout.trim()
+    if (isVerbose()) console.log(yellow('    $ git config user.name'))
+    user = (await $`git config user.name`).stdout.trim()
+  } catch {}
+
+  const line = `Branch ${branch} (at ${commit}) deployed as release ${deployCtx.release} by ${user}`
+  const logFile = `${host.deployPath}/revisions.log`
+
+  await ssh(host, `echo ${q(line)} >> ${q(logFile)}`)
+})
 
 task('deploy:healthcheck', async ({ deployCtx, host }: TaskContext) => {
   console.log(`==> ${blue(`[${host.name}]`)} healthcheck ${host.healthcheckUrl}`)

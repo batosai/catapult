@@ -46,22 +46,4 @@ task('deploy:update_code', async ({ host, paths, deployCtx }: TaskContext) => {
   )
 })
 
-task('deploy:log_revision', async ({ host, deployCtx }: TaskContext) => {
-  const branch = typeof host.branch === 'object' ? host.branch.name : (host.branch ?? 'unknown')
-  let commit = 'unknown'
-  let user = 'unknown'
-
-  try {
-    if (isVerbose()) console.log(yellow('    $ git rev-parse HEAD'))
-    commit = (await $`git rev-parse HEAD`).stdout.trim()
-    if (isVerbose()) console.log(yellow('    $ git config user.name'))
-    user = (await $`git config user.name`).stdout.trim()
-  } catch {}
-
-  const line = `Branch ${branch} (at ${commit}) deployed as release ${deployCtx.release} by ${user}`
-  const logFile = `${host.deployPath}/revisions.log`
-
-  await ssh(host, `echo ${q(line)} >> ${q(logFile)}`)
-})
-
 after('deploy:lock', 'git:check')
