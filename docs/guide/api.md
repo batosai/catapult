@@ -38,7 +38,7 @@ await defineConfig({
 | `keepReleases`        | `number`          | Number of releases to keep (default: `5`)           |
 | `repository`          | `string`          | Git repository URL (auto-detected from origin)      |
 | `hooks`               | `Hooks`           | Lifecycle hooks (`beforeDeploy`, `afterDeploy`, …)  |
-| `verbose`             | `boolean`         | Print SSH commands in the terminal (default: `true`) |
+| `verbose`             | `0 \| 1 \| 2`    | Verbosity level: `1` prints SSH commands, `2` also prints stdout (default: `0`) |
 
 ---
 
@@ -124,7 +124,7 @@ Per-host binary paths are configured in `defineConfig`:
 
 ### `isVerbose()`
 
-Returns `true` if `verbose: true` is set in the config. Useful for conditional logging inside async tasks.
+Returns the current verbosity level (`0`, `1` or `2`). Truthy when verbose is enabled. Useful for conditional logging inside async tasks.
 
 ```typescript
 import { task, isVerbose } from '@catapultjs/deploy'

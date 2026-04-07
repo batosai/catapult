@@ -59,7 +59,7 @@ await defineConfig({
     },
   ],
 
-  verbose: true, // prints SSH commands in the terminal (default: true)
+  verbose: 1, // 0: silent, 1: print SSH commands, 2: print SSH commands + stdout
 })
 ```
 
@@ -77,6 +77,10 @@ npx cata deploy:setup
 
 # Deploy
 npx cata deploy
+
+# Deploy with verbose output (-v level 1, -vv level 2)
+npx cata deploy -v
+npx cata deploy -vv
 
 # Rollback to the previous release
 npx cata rollback
