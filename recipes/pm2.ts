@@ -1,10 +1,11 @@
 import type {} from '../src/types.ts'
 import { createRequire } from 'module'
-import { type TaskContext, task, after, onStatus, bin } from '../index.ts'
+import { type TaskContext, task, cd, run, after, onStatus, bin } from '../index.ts'
 import { getPaths, ssh, q } from '../src/utils.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
+    'pm2:ecosystem': true
     'pm2:start': true
     'pm2:save': true
     'pm2:reload': true
@@ -20,23 +21,18 @@ onStatus(async (_ctx, host) => {
   console.log(stdout.trim() ? `pm2 ${stdout.trim()}` : 'pm2 unavailable')
 })
 
-task('pm2:start', async ({ host, deployCtx }: TaskContext) => {
-  const paths = getPaths(host.deployPath, deployCtx.release)
-
-  await ssh(
-    host,
-    `
-    set -e
-    cd ${q(paths.current)}
-    ${bin('pm2')} startOrReload ecosystem.config.cjs --update-env
-  `
-  )
-  console.log(`✅ [${host.name}] pm2 started`)
+task('pm2:ecosystem', () => {
+  run('ln -sfn {{release_path}}/ecosystem.config.cjs {{base_path}}/ecosystem.config.cjs')
 })
 
-task('pm2:save', async ({ host }: TaskContext) => {
-  await ssh(host, `set -e\n${bin('pm2')} save`)
-  console.log(`✅ [${host.name}] pm2 saved`)
+task('pm2:start', ({ host, deployCtx }: TaskContext) => {
+  const paths = getPaths(host.deployPath, deployCtx.release)
+  cd(paths.current)
+  run(`${bin('pm2')} startOrReload ecosystem.config.cjs --update-env`)
+})
+
+task('pm2:save', () => {
+  run(`${bin('pm2')} save`)
 })
 
 task('pm2:logs', async ({ host, deployCtx }: TaskContext) => {
@@ -81,5 +77,6 @@ task('pm2:restart', async ({ host, deployCtx }: TaskContext) => {
   console.log(`✅ [${host.name}] pm2 restarted`)
 })
 
-after('deploy:publish', 'pm2:start')
+after('deploy:publish', 'pm2:ecosystem')
+after('pm2:ecosystem', 'pm2:start')
 after('pm2:start', 'pm2:save')
