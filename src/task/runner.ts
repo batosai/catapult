@@ -1,10 +1,12 @@
 import type { Host, DeployContext, Paths } from '../types.ts'
-import { ssh, yellow } from '../utils.ts'
+import { ssh } from '../utils.ts'
+import { logger, type CatapultLogger } from '../logger.ts'
 
 export interface TaskContext {
   host: Host
   paths: Paths
   deployCtx: DeployContext
+  logger: CatapultLogger
 }
 
 export type TaskFn = (ctx: TaskContext) => void | Promise<void>
@@ -57,7 +59,7 @@ export class TaskRunner {
     const cmds = this.#commands.splice(0)
     const verbose = this.#ctx.deployCtx.config.verbose ?? 0
     if (verbose >= 1) {
-      for (const cmd of cmds) console.log(yellow(`    $ ${cmd}`))
+      for (const cmd of cmds) logger.cmd(cmd)
     }
     const subprocess = ssh(this.#ctx.host, ['set -e', ...cmds].join('\n'), { color: true })
     if (verbose >= 2) subprocess.stdout?.pipe(process.stdout)

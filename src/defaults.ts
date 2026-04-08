@@ -1,5 +1,5 @@
 import { $ } from 'execa'
-import { q, ssh, yellow, blue, sleep } from './utils.ts'
+import { q, ssh, sleep } from './utils.ts'
 import { type TaskContext, task, run, isVerbose } from './task.ts'
 import { get } from './store.ts'
 
@@ -47,7 +47,8 @@ task('deploy:unlock', async ({ host, paths }: TaskContext) => {
     set +e
     rm -f ${q(paths.lock)}
     true
-  `
+  `,
+    { quiet: true }
   )
 })
 
@@ -78,15 +79,15 @@ task('deploy:publish', () => {
   run('ln -sfn {{release_path}} {{current_path}}')
 })
 
-task('deploy:log_revision', async ({ host, deployCtx }: TaskContext) => {
+task('deploy:log_revision', async ({ host, deployCtx, logger }: TaskContext) => {
   const branch = typeof host.branch === 'object' ? host.branch.name : (host.branch ?? 'unknown')
   let commit = 'unknown'
   let user = 'unknown'
 
   try {
-    if (isVerbose()) console.log(yellow('    $ git rev-parse HEAD'))
+    if (isVerbose()) logger.cmd('git rev-parse HEAD')
     commit = (await $`git rev-parse HEAD`).stdout.trim()
-    if (isVerbose()) console.log(yellow('    $ git config user.name'))
+    if (isVerbose()) logger.cmd('git config user.name')
     user = (await $`git config user.name`).stdout.trim()
   } catch {}
 
@@ -96,8 +97,8 @@ task('deploy:log_revision', async ({ host, deployCtx }: TaskContext) => {
   await ssh(host, `echo ${q(line)} >> ${q(logFile)}`)
 })
 
-task('deploy:healthcheck', async ({ deployCtx, host }: TaskContext) => {
-  console.log(`==> ${blue(`[${host.name}]`)} healthcheck ${host.healthcheckUrl}`)
+task('deploy:healthcheck', async ({ deployCtx, host, logger }: TaskContext) => {
+  logger.step(host.name, `healthcheck ${host.healthcheckUrl}`)
 
   if (deployCtx.config.healthcheckRetries) {
     for (let i = 1; i <= deployCtx.config.healthcheckRetries; i += 1) {
@@ -109,14 +110,10 @@ task('deploy:healthcheck', async ({ deployCtx, host }: TaskContext) => {
           curl --fail --silent --show-error --max-time 5 ${q(host.healthcheckUrl)} >/dev/null
         `
         )
-        console.log(
-          `==> ${blue(`[${host.name}]`)} healthcheck OK (${i}/${deployCtx.config.healthcheckRetries})`
-        )
+        logger.step(host.name, `healthcheck OK (${i}/${deployCtx.config.healthcheckRetries})`)
         return
       } catch {
-        console.log(
-          `==> ${blue(`[${host.name}]`)} healthcheck failed (${i}/${deployCtx.config.healthcheckRetries})`
-        )
+        logger.step(host.name, `healthcheck failed (${i}/${deployCtx.config.healthcheckRetries})`)
         if (i < deployCtx.config.healthcheckRetries) {
           await sleep(deployCtx.config.healthcheckDelayMs || 3_000)
         }

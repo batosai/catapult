@@ -1,6 +1,7 @@
 import type { Host, DeployContext, TaskName } from '../types.ts'
 import { getPaths } from '../utils.ts'
 import { type TaskFn, TaskRunner } from './runner.ts'
+import { logger } from '../logger.ts'
 
 export class TaskStore {
   #registry = new Map<string, TaskFn>()
@@ -27,7 +28,7 @@ export class TaskStore {
     if (!fn) throw new Error(`Task not found: "${name}"`)
 
     const paths = getPaths(host.deployPath, deployCtx.release)
-    const ctx = { host, paths, deployCtx }
+    const ctx = { host, paths, deployCtx, logger }
     this.#runner.set(ctx)
 
     try {

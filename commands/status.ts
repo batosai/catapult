@@ -5,6 +5,7 @@ import { getPipeline } from '../src/pipeline.ts'
 import { hooks } from '../src/pipeline/hooks.ts'
 import { q, getPaths, ssh, detectPackageManager } from '../src/utils.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
+import { logger } from '../src/logger.ts'
 
 export default class Status extends BaseDeployCommand {
   static commandName = 'status'
@@ -50,7 +51,7 @@ export default class Status extends BaseDeployCommand {
         this.logger.log(`${pm.padEnd(8)} ${this.colors.dim(pmVersion || 'unavailable')}`)
 
         for (const hook of hooks.getStatus()) {
-          await hook(ctx, host)
+          await hook(ctx, host, logger)
         }
 
         const { stdout: lockStdout } = await ssh(

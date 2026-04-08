@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { createHash } from 'node:crypto'
 import { access } from 'node:fs/promises'
-import { colors } from '@poppinss/cliui'
+import { logger } from './logger.ts'
 
 const DEPLOY_CANDIDATES = ['deploy.ts', 'deploy.js', 'bin/deploy.ts', 'bin/deploy.js']
 
@@ -14,10 +14,6 @@ const PM_LOCK_FILES: [string, string][] = [
   ['yarn.lock', 'yarn'],
   ['package-lock.json', 'npm'],
 ]
-
-export const yellow = (s: string) => colors.ansi().yellow(s)
-export const blue = (s: string) => colors.ansi().blue(s)
-export const gray = (s: string) => colors.ansi().dim(s)
 
 /** Detects the package manager by checking for lock files in the given directory. */
 export async function detectPackageManager(cwd = process.cwd()): Promise<string> {
@@ -82,7 +78,7 @@ export function ssh(
   command: string,
   opts?: { quiet?: boolean; verbose?: boolean; color?: boolean }
 ) {
-  if (opts?.verbose && !opts?.quiet) console.log(yellow(`    $ ${command}`))
+  if (opts?.verbose && !opts?.quiet) logger.cmd(command)
   const cmd = opts?.color ? `export FORCE_COLOR=1\n${command}` : command
   const b64 = Buffer.from(cmd).toString('base64')
   const args = [...sshControlArgs(host), ...resolveSshArgs(host)]

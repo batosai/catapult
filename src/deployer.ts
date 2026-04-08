@@ -1,8 +1,9 @@
 import type { Host, DeployContext, Hooks, HookContext } from './types.ts'
-import { q, getPaths, ssh, blue, gray, elapsed } from './utils.ts'
+import { q, getPaths, ssh, elapsed } from './utils.ts'
 import { runTask } from './task.ts'
 import { get } from './store.ts'
 import { getPipeline } from './pipeline.ts'
+import { logger } from './logger.ts'
 
 // ---------------------------------------------------------------------------
 // Hook runner
@@ -14,7 +15,7 @@ async function runHook(
   context: HookContext = {}
 ): Promise<void> {
   if (!ctx.hooks[name]) return
-  console.log(`==> hook: ${name}`)
+  logger.step(`hook: ${name}`)
   await ctx.hooks[name]!(context)
 }
 
@@ -25,7 +26,7 @@ async function runHook(
 export async function setupHost(ctx: DeployContext, host: Host): Promise<void> {
   const paths = getPaths(host.deployPath, ctx.release)
 
-  console.log(`==> ${blue(`[${host.name}]`)} setup directories`)
+  logger.step(host.name, 'setup directories')
 
   const dirs: string[] = get('writable_dirs', [])
   const files: string[] = get('shared_files', [])
@@ -108,7 +109,7 @@ export async function rollbackHost(ctx: DeployContext, host: Host): Promise<void
     throw new Error(`[${host.name}] no previous release available`)
   }
 
-  console.log(`==> ${blue(`[${host.name}]`)} rollback to ${previous}`)
+  logger.step(host.name, `rollback to ${previous}`)
 
   await ssh(host, `set -e\nln -sfn ${q(paths.releases + '/' + previous)} ${q(paths.current)}`)
 
@@ -122,6 +123,7 @@ export async function rollbackHost(ctx: DeployContext, host: Host): Promise<void
 }
 
 export async function deployHost(ctx: DeployContext, host: Host): Promise<void> {
+  let locked = false
   let published = false
   const deployStart = Date.now()
 
@@ -129,31 +131,26 @@ export async function deployHost(ctx: DeployContext, host: Host): Promise<void> 
 
   try {
     for (const taskName of getPipeline()) {
-      console.log(
-        `${gray(elapsed(Date.now() - deployStart))} ${blue(`[${host.name}]`)} ${taskName}`
-      )
+      logger.task(elapsed(Date.now() - deployStart), host.name, taskName)
       await runTask(taskName, ctx, host)
+      if (taskName === 'deploy:lock') locked = true
       if (taskName === 'deploy:publish') published = true
     }
 
-    console.log(
-      `✅ ${blue(`[${host.name}]`)} deploy OK -> ${ctx.release} ${gray(`(${elapsed(Date.now() - deployStart)})`)}`
-    )
+    logger.ok(host.name, `deploy OK -> ${ctx.release}`, elapsed(Date.now() - deployStart))
   } catch (error) {
-    console.error(`❌ ${blue(`[${host.name}]`)} deploy failed: ${(error as Error).message}`)
+    logger.fail(host.name, `deploy failed: ${(error as Error).message}`)
 
     if (published) {
       try {
         await rollbackHost(ctx, host)
-        console.log(`↩️ ${blue(`[${host.name}]`)} auto rollback OK`)
+        logger.rollback(host.name, 'auto rollback OK')
       } catch (rollbackError) {
-        console.error(
-          `💥 ${blue(`[${host.name}]`)} auto rollback failed: ${(rollbackError as Error).message}`
-        )
+        logger.boom(host.name, `auto rollback failed: ${(rollbackError as Error).message}`)
       }
     }
 
-    await runTask('deploy:unlock', ctx, host)
+    if (locked) await runTask('deploy:unlock', ctx, host)
     throw error
   } finally {
     await runHook(ctx, 'afterHostDeploy', { host })
