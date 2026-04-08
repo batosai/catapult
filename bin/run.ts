@@ -3,6 +3,7 @@
 import { pathToFileURL } from 'url'
 import { findDeployFile } from '../src/utils.ts'
 import { Context } from '../src/context.ts'
+import { logger } from '../src/logger.ts'
 import { Kernel, ListLoader, HelpCommand } from '@adonisjs/ace'
 import Version from '../commands/version.js'
 import Init from '../commands/init.js'
@@ -31,13 +32,14 @@ if (!skipDeployFile) {
   const deployFile = await findDeployFile()
 
   if (!deployFile) {
-    console.error(
+    logger.error(
       'No deploy.ts or deploy.js found in current directory. Run `npx cata init` to create one.'
     )
     process.exit(1)
   }
 
-  await import(pathToFileURL(deployFile).href)
+  const mod = await import(pathToFileURL(deployFile).href)
+  await mod.default()
 
   const verboseLevel = parseVerboseLevel(process.argv.slice(2))
   if (verboseLevel > 0) Context.get().config.verbose = verboseLevel
