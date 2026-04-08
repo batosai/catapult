@@ -100,7 +100,7 @@ import { withBase } from 'vitepress'
             <h4>Configure</h4>
             <pre><code><span class="c-keyword">import</span> { defineConfig } <span class="c-keyword">from</span> <span class="c-string">'@catapultjs/deploy'</span>
 
-<span class="c-keyword">await</span> <span class="c-fn">defineConfig</span>({
+<span class="c-keyword">export default</span> <span class="c-fn">defineConfig</span>({
   keepReleases: <span class="c-num">5</span>,
   hosts: [{
     name: <span class="c-string">'production'</span>,

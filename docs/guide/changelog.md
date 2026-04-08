@@ -4,6 +4,16 @@ description: Catapult changelog — release history and notable changes.
 
 # Changelog
 
+## 0.0.4
+
+- `defineConfig` now returns a function and must be used as `export default defineConfig({...})` — the CLI calls it explicitly, giving full control over execution order
+- Added a `logger` instance to `TaskContext`, `onStatus()` and `onSetup()` callbacks — no more direct imports needed inside tasks and recipes
+- `ssh()` now accepts a `{ color: true }` option that prepends `export FORCE_COLOR=1` to the remote command, enabling colored output from tools like PM2
+- `recipes/pm2`: added `pm2:show` task — displays detailed PM2 process info for each app defined in `ecosystem.config.cjs`
+- `recipes/pm2`: `pm2:logs` and `pm2:list` now use `{ color: true }` for colored terminal output
+- `task` command now accepts `-v` / `-vv` verbose flags (consistent with `deploy`)
+- Fixed: `deploy:unlock` is no longer called when `deploy:lock` itself fails — a lock held by another deployment is no longer removed on error
+
 ## 0.0.3
 
 - `verbose` config option changed from `boolean` to `0 | 1 | 2`: level `1` prints SSH commands, level `2` also streams stdout

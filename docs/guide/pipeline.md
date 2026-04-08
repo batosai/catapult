@@ -81,7 +81,7 @@ task('deploy:update_code', () => {
   run('rsync ...')
 })
 
-await defineConfig({ ... })
+export default defineConfig({ ... })
 ```
 
 ## Async task

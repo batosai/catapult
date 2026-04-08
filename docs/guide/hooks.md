@@ -11,7 +11,7 @@ description: Use Catapult hooks to run custom logic before or after a deployment
 Hooks are global callbacks that run around the deployment, outside the pipeline.
 
 ```typescript
-await defineConfig({
+export default defineConfig({
   // ...
   hooks: {
     async beforeDeploy({ hosts }) {

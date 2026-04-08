@@ -30,8 +30,9 @@ The task function receives a `ctx` argument with the current `host`, `paths`, an
 import { task, after } from '@catapultjs/deploy'
 import { ssh, q } from '@catapultjs/deploy/utils'
 
-task('my-recipe:build', async ({ host, paths, deployCtx }) => {
+task('my-recipe:build', async ({ host, paths, deployCtx, logger }) => {
   await ssh(host, `set -e\ncd ${q(paths.release)}\nnpm run build`)
+  logger.ok(host.name, 'build complete')
 })
 
 after('deploy:update_code', 'my-recipe:build')
@@ -51,7 +52,7 @@ Use `onSetup()` to run server-side initialization during `cata deploy:setup` (e.
 import { onSetup } from '@catapultjs/deploy'
 import { ssh, q, getPaths } from '@catapultjs/deploy/utils'
 
-onSetup(async (ctx, host) => {
+onSetup(async (ctx, host, logger) => {
   const paths = getPaths(host.deployPath, ctx.release)
   await ssh(
     host,
@@ -63,6 +64,7 @@ onSetup(async (ctx, host) => {
     fi
   `
   )
+  logger.step(host.name, 'shared directories ready')
 })
 ```
 
@@ -74,9 +76,9 @@ Use `onStatus()` to display additional information during `cata status` (e.g. pr
 import { onStatus } from '@catapultjs/deploy'
 import { ssh } from '@catapultjs/deploy/utils'
 
-onStatus(async (_ctx, host) => {
+onStatus(async (_ctx, host, logger) => {
   const { stdout } = await ssh(host, `set +e\nmy-service --version || true`)
-  console.log(`my-service ${stdout.trim() || 'unavailable'}`)
+  logger.log(`my-service ${stdout.trim() || 'unavailable'}`)
 })
 ```
 

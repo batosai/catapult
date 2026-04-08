@@ -32,7 +32,7 @@ import '@catapultjs/deploy/recipes/git'
 import '@catapultjs/deploy/recipes/adonisjs'
 import '@catapultjs/deploy/recipes/pm2'
 
-await defineConfig({
+export default defineConfig({
   keepReleases: 5,
 
   repository: 'git@github.com:user/myapp.git', // optional, auto-detected from origin
@@ -99,6 +99,9 @@ npx cata list:tasks
 
 # Run a specific task on servers
 npx cata task <task-name>
+
+# Run a task with verbose output
+npx cata task <task-name> -v
 
 # Open an interactive SSH session on a host
 npx cata ssh

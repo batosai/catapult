@@ -14,10 +14,10 @@ All functions are exported from `@catapultjs/deploy`.
 
 ### `defineConfig(config)`
 
-Initialises the deployment configuration. Must be called (with `await`) in your `deploy.ts`.
+Initialises the deployment configuration. Must be used as the default export of your `deploy.ts`.
 
 ```typescript
-await defineConfig({
+export default defineConfig({
   keepReleases: 5,
   hosts: [
     {
@@ -63,7 +63,7 @@ task('my:build', () => {
 The callback receives a [`TaskContext`](#taskcontext) as its first argument:
 
 ```typescript
-task('my:build', async ({ host, paths, deployCtx }) => {
+task('my:build', async ({ host, paths, deployCtx, logger }) => {
   // ...
 })
 ```
@@ -129,8 +129,8 @@ Returns the current verbosity level (`0`, `1` or `2`). Truthy when verbose is en
 ```typescript
 import { task, isVerbose } from '@catapultjs/deploy'
 
-task('my:task', async ({ host }) => {
-  if (isVerbose()) console.log(`[${host.name}] doing something`)
+task('my:task', async ({ host, logger }) => {
+  if (isVerbose()) logger.step(host.name, 'doing something')
 })
 ```
 
@@ -204,9 +204,10 @@ Registers a callback to run during `cata deploy:setup`, after the base directori
 import { onSetup } from '@catapultjs/deploy'
 import { ssh, q, getPaths } from '@catapultjs/deploy/utils'
 
-onSetup(async (ctx, host) => {
+onSetup(async (ctx, host, logger) => {
   const paths = getPaths(host.deployPath, ctx.release)
   await ssh(host, `mkdir -p ${q(paths.shared + '/uploads')}`)
+  logger.step(host.name, 'uploads directory ready')
 })
 ```
 
@@ -220,9 +221,9 @@ Registers a callback to run during `cata status`. Useful for displaying addition
 import { onStatus } from '@catapultjs/deploy'
 import { ssh } from '@catapultjs/deploy/utils'
 
-onStatus(async (_ctx, host) => {
+onStatus(async (_ctx, host, logger) => {
   const { stdout } = await ssh(host, `set +e\nmy-service --version || true`)
-  console.log(`my-service ${stdout.trim() || 'unavailable'}`)
+  logger.log(`my-service ${stdout.trim() || 'unavailable'}`)
 })
 ```
 

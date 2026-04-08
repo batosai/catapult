@@ -118,6 +118,7 @@ Requires an `ecosystem.config.cjs` file at the root of the project.
 | `pm2:stop`        | —                         | Stops all processes (manual)                                                         |
 | `pm2:logs`        | —                         | Displays the last 50 lines of logs (manual)                                          |
 | `pm2:list`        | —                         | Lists PM2 processes (manual)                                                         |
+| `pm2:show`        | —                         | Shows detailed info for each app in ecosystem.config.cjs (manual)                   |
 
 `pm2:ecosystem` creates a stable symlink at `{deploy_path}/ecosystem.config.cjs` pointing to the current release's config. This allows PM2 to reference a fixed path regardless of which release is active.
 
