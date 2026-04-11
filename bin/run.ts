@@ -16,6 +16,7 @@ import ListTasks from '../commands/list_tasks.js'
 import ListPipeline from '../commands/list_pipeline.js'
 import RunTask from '../commands/run_task.js'
 import Ssh from '../commands/ssh.js'
+import Run from '../commands/run.js'
 
 function parseVerboseLevel(argv: string[]): 0 | 1 | 2 {
   let count = 0
@@ -107,6 +108,7 @@ kernel.addLoader(
     ListPipeline,
     RunTask,
     Ssh,
+    Run,
   ])
 )
 

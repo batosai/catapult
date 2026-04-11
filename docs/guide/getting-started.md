@@ -109,6 +109,10 @@ npx cata task <task-name>
 # Run a task with verbose output
 npx cata task <task-name> -v
 
+# Run a shell command on one or more hosts
+npx cata run "pm2 list"
+npx cata run "pm2 list" --host production
+
 # Open an interactive SSH session on a host
 npx cata ssh
 
