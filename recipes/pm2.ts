@@ -11,6 +11,7 @@ declare module '../src/types.ts' {
     'pm2:stop': true
     'pm2:reload': true
     'pm2:restart': true
+    'pm2:delete': true
     'pm2:logs': true
     'pm2:list': true
     'pm2:show': true
@@ -49,6 +50,11 @@ task('pm2:reload', async () => {
 task('pm2:restart', async () => {
   cd('{{base_path}}')
   run(`${bin('pm2')} restart ecosystem.config.cjs --update-env`)
+})
+
+task('pm2:delete', async () => {
+  cd('{{base_path}}')
+  run(`${bin('pm2')} delete ecosystem.config.cjs --update-env`)
 })
 
 task('pm2:logs', async ({ host, deployCtx, logger }: TaskContext) => {

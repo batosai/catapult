@@ -22,6 +22,7 @@ Requires an `ecosystem.config.cjs` file at the root of the project.
 | `pm2:reload`    | —                      | Zero-downtime reload (manual)                                                       |
 | `pm2:restart`   | —                      | Hard restart (manual)                                                               |
 | `pm2:stop`      | —                      | Stops all processes (manual)                                                        |
+| `pm2:delete`    | —                      | Deletes all processes from PM2 (manual)                                             |
 | `pm2:logs`      | —                      | Displays the last 50 lines of logs (manual)                                         |
 | `pm2:list`      | —                      | Lists PM2 processes (manual)                                                        |
 | `pm2:show`      | —                      | Shows detailed info for each app in ecosystem.config.cjs (manual)                  |
