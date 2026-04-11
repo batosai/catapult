@@ -4,6 +4,14 @@ description: Catapult changelog — release history and notable changes.
 
 # Changelog
 
+## 0.0.6
+
+- Added `run` command — executes a shell command on one or more hosts via SSH (`npx cata run "pm2 list"`)
+- Added `desc(description)` function — sets a description for the next `task()` call, displayed in `cata list:tasks`
+- Added `afterFailure` hook — called when a deployment fails, receives `{ hosts, error }`
+- `packageManager` is now auto-detected from lock files (`bun.lock`, `pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`) if not set in `defineConfig`
+- `recipes/pm2`: added `pm2:delete` task — deletes all processes from PM2
+
 ## 0.0.5
 
 - Added `recipes/nodejs` — registers `nodejs:install`, `nodejs:install:production`, `nodejs:build` and `nodejs:test` tasks, inserted automatically after `deploy:shared`
