@@ -1,4 +1,4 @@
-import type { Host, Paths } from './types.ts'
+import type { Host, Paths, PackageManager } from './types.ts'
 import { $ } from 'execa'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -17,14 +17,14 @@ const PM_LOCK_FILES: [string, string][] = [
 ]
 
 /** Detects the package manager by checking for lock files in the given directory. */
-export async function detectPackageManager(cwd = process.cwd()): Promise<string> {
+export async function detectPackageManager(cwd = process.cwd()): Promise<PackageManager> {
   for (const [lockFile, manager] of PM_LOCK_FILES) {
     try {
       await access(resolve(cwd, lockFile))
-      return manager
+      return manager as PackageManager
     } catch {}
   }
-  return 'npm'
+  return 'npm' as PackageManager
 }
 
 /** Returns the path of the first existing deploy config file, or null if none found. */

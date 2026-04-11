@@ -1,18 +1,20 @@
 import type { Config } from './types.ts'
 import { Context } from './context.ts'
+import { detectPackageManager } from './utils.ts'
 import { remove, getPipeline } from './pipeline.ts'
 import './defaults.ts'
 
 const initialConfigValues = {
   keepReleases: 5,
-  packageManager: 'npm' as const,
 }
 
 export function defineConfig(config: Config): () => Promise<void> {
   return async () => {
+    const pm = await detectPackageManager()
     const release = new Date().toISOString().replace(/[:.]/g, '-')
+    const initial = { packageManager: pm, ...initialConfigValues }
     Context.set({
-      config: { ...initialConfigValues, ...config },
+      config: { ...initial, ...config },
       release,
       hooks: config.hooks ?? {},
     })

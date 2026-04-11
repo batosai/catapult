@@ -41,6 +41,8 @@ export type TaskName = keyof TaskRegistry | (string & {})
 export type HookContext = { host?: Host; hosts?: Host[] }
 export type HookFn = (context: HookContext) => Promise<void>
 
+export type PackageManager = 'npm' | 'pnpm' | 'yarn' | 'bun'
+
 export interface Hooks {
   beforeDeploy?: HookFn
   afterDeploy?: HookFn
@@ -51,7 +53,7 @@ export interface Hooks {
 export interface Config {
   keepReleases?: number
   repository?: string
-  packageManager?: 'npm' | 'pnpm' | 'yarn' | 'bun'
+  packageManager?: PackageManager
   hosts: Host[]
 
   hooks?: Hooks
