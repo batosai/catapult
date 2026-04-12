@@ -59,7 +59,7 @@ task('deploy:release', () => {
   run('mkdir -p {{release_path}}')
 })
 
-desc('Transfers code to the release directory (overridden by git or rsync recipe)')
+desc('Transfers code to the release directory (overridden by recipe)')
 task('deploy:update_code', async () => {})
 
 desc('Symlinks shared directories and files into the release')
