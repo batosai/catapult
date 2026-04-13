@@ -5,6 +5,8 @@ export class PipelineStore {
     'deploy:lock',
     'deploy:release',
     'deploy:update_code',
+    'deploy:build:shared',
+    'deploy:copy_build',
     'deploy:shared',
     'deploy:publish',
     'deploy:log_revision',
