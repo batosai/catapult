@@ -1,4 +1,4 @@
-import { task, desc, cd, run, bin, after, pm, pmInstall, pmInstallProd } from '../index.ts'
+import { task, hasTask, desc, cd, run, bin, after, pm, pmInstall, pmInstallProd } from '../index.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
@@ -10,21 +10,25 @@ declare module '../src/types.ts' {
 
 desc('Installs dependencies with frozen lockfile')
 task('bun:install', () => {
-  cd('{{release_path}}')
+  cd('{{build_path}}')
   run(pmInstall())
 })
 
 desc('Installs production-only dependencies')
 task('bun:install:production', () => {
-  cd('{{release_path}}')
+  cd('{{build_path}}')
   run(pmInstallProd())
 })
 
 desc('Builds the application')
 task('bun:build', () => {
-  cd('{{release_path}}')
+  cd('{{build_path}}')
   run(`${bin(pm())} run build`)
 })
 
-after('deploy:shared', 'bun:install')
-after('bun:install', 'bun:build')
+after('deploy:update_code', 'bun:install')
+after('deploy:build:shared', 'bun:build')
+
+if (hasTask('deploy:copy_build')) {
+  after('deploy:copy_build', 'bun:install:production')
+}

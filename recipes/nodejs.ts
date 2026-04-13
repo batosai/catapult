@@ -1,5 +1,5 @@
 import type {} from '../src/types.ts'
-import { task, desc, cd, run, bin, after, pm, pmInstall, pmInstallProd } from '../index.ts'
+import { task, hasTask, desc, cd, run, bin, after, pm, pmInstall, pmInstallProd } from '../index.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
@@ -12,7 +12,7 @@ declare module '../src/types.ts' {
 
 desc('Installs dependencies with frozen lockfile')
 task('nodejs:install', () => {
-  cd('{{release_path}}')
+  cd('{{build_path}}')
   run(pmInstall())
 })
 
@@ -24,15 +24,19 @@ task('nodejs:install:production', () => {
 
 desc('Builds the application')
 task('nodejs:build', () => {
-  cd('{{release_path}}')
+  cd('{{build_path}}')
   run(`${bin(pm())} run build`)
 })
 
 desc('Runs the test suite')
 task('nodejs:test', () => {
-  cd('{{release_path}}')
+  cd('{{build_path}}')
   run(`${bin(pm())} test`)
 })
 
-after('deploy:shared', 'nodejs:install')
-after('nodejs:install', 'nodejs:build')
+after('deploy:update_code', 'nodejs:install')
+after('deploy:build:shared', 'nodejs:build')
+
+if (hasTask('deploy:copy_build')) {
+  after('deploy:copy_build', 'nodejs:install:production')
+}
