@@ -1,4 +1,5 @@
 import type { Config } from './types.ts'
+import { Strategy } from './enums.ts'
 import { Context } from './context.ts'
 import { detectPackageManager } from './utils.ts'
 import { remove, getPipeline } from './pipeline.ts'
@@ -6,6 +7,8 @@ import './defaults.ts'
 
 const initialConfigValues = {
   keepReleases: 5,
+  verbose: 1 as const,
+  strategy: Strategy.Build,
 }
 
 export function defineConfig(config: Config): () => Promise<void> {
@@ -22,6 +25,12 @@ export function defineConfig(config: Config): () => Promise<void> {
     const hasHealthcheck = config.hosts.some((h) => h.healthcheck?.url)
     if (!hasHealthcheck && getPipeline().includes('deploy:healthcheck')) {
       remove('deploy:healthcheck')
+    }
+
+    const strategy = config.strategy ?? Strategy.Build
+    if (strategy !== Strategy.Build) {
+      remove('deploy:copy_build')
+      remove('deploy:build:shared')
     }
   }
 }
