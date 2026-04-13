@@ -2,6 +2,7 @@ import { test } from '@japa/runner'
 import { Context } from '../src/context.ts'
 import { pm, pmInstall, pmInstallProd } from '../src/package_manager.ts'
 import type { Config } from '../src/types.ts'
+import { PackageManager } from '../src/enums.ts'
 
 function setManager(packageManager: Config['packageManager']) {
   Context.set({
@@ -12,7 +13,7 @@ function setManager(packageManager: Config['packageManager']) {
 }
 
 test.group('package_manager', (group) => {
-  group.each.teardown(() => setManager('npm'))
+  group.each.teardown(() => setManager(PackageManager.Npm))
 
   test('pm() returns npm by default', ({ assert }) => {
     setManager(undefined)
@@ -20,42 +21,42 @@ test.group('package_manager', (group) => {
   })
 
   test('pm() returns pnpm when set', ({ assert }) => {
-    setManager('pnpm')
+    setManager(PackageManager.Pnpm)
     assert.equal(pm(), 'pnpm')
   })
 
   test('pm() returns yarn when set', ({ assert }) => {
-    setManager('yarn')
+    setManager(PackageManager.Yarn)
     assert.equal(pm(), 'yarn')
   })
 
   test('pmInstall() returns npm ci for npm', ({ assert }) => {
-    setManager('npm')
+    setManager(PackageManager.Npm)
     assert.equal(pmInstall(), 'npm ci')
   })
 
   test('pmInstall() returns frozen lockfile command for pnpm', ({ assert }) => {
-    setManager('pnpm')
+    setManager(PackageManager.Pnpm)
     assert.equal(pmInstall(), 'pnpm install --frozen-lockfile')
   })
 
   test('pmInstall() returns frozen lockfile command for yarn', ({ assert }) => {
-    setManager('yarn')
+    setManager(PackageManager.Yarn)
     assert.equal(pmInstall(), 'yarn install --frozen-lockfile')
   })
 
-  test('pmInstallProd() returns npm install --omit=dev for npm', ({ assert }) => {
-    setManager('npm')
-    assert.equal(pmInstallProd(), 'npm install --omit=dev')
+  test('pmInstallProd() returns npm ci --omit=dev for npm', ({ assert }) => {
+    setManager(PackageManager.Npm)
+    assert.equal(pmInstallProd(), 'npm ci --omit=dev')
   })
 
-  test('pmInstallProd() returns pnpm install --prod for pnpm', ({ assert }) => {
-    setManager('pnpm')
-    assert.equal(pmInstallProd(), 'pnpm install --prod')
+  test('pmInstallProd() returns pnpm install --frozen-lockfile --prod for pnpm', ({ assert }) => {
+    setManager(PackageManager.Pnpm)
+    assert.equal(pmInstallProd(), 'pnpm install --frozen-lockfile --prod')
   })
 
-  test('pmInstallProd() returns yarn install --production for yarn', ({ assert }) => {
-    setManager('yarn')
-    assert.equal(pmInstallProd(), 'yarn install --production')
+  test('pmInstallProd() returns yarn install --frozen-lockfile --production for yarn', ({ assert }) => {
+    setManager(PackageManager.Yarn)
+    assert.equal(pmInstallProd(), 'yarn install --frozen-lockfile --production')
   })
 })
