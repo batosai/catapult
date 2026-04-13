@@ -13,7 +13,7 @@ import Rollback from '../commands/rollback.js'
 import Status from '../commands/status.js'
 import ListReleases from '../commands/list_releases.js'
 import ListTasks from '../commands/list_tasks.js'
-import ListPipeline from '../commands/list_pipeline.js'
+import Pipeline from '../commands/pipeline.js'
 import RunTask from '../commands/run_task.js'
 import Ssh from '../commands/ssh.js'
 import Run from '../commands/run.js'
@@ -105,7 +105,7 @@ kernel.addLoader(
     Status,
     ListReleases,
     ListTasks,
-    ListPipeline,
+    Pipeline,
     RunTask,
     Ssh,
     Run,
