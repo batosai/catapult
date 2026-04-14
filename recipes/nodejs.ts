@@ -1,5 +1,18 @@
 import type {} from '../src/types.ts'
-import { task, hasTask, desc, cd, run, bin, after, pm, pmInstall, pmInstallProd } from '../index.ts'
+import {
+  task,
+  hasTask,
+  desc,
+  cd,
+  run,
+  bin,
+  after,
+  pm,
+  pmInstall,
+  pmInstallProd,
+  TaskContext,
+} from '../index.ts'
+import { Strategy } from '../src/enums.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
@@ -11,8 +24,13 @@ declare module '../src/types.ts' {
 }
 
 desc('Installs dependencies with frozen lockfile')
-task('nodejs:install', () => {
-  cd('{{build_path}}')
+task('nodejs:install', ({ config }: TaskContext) => {
+  if (config.strategy === Strategy.Build) {
+    cd('{{build_path}}')
+  } else {
+    cd('{{release_path}}')
+  }
+
   run(pmInstall())
 })
 
@@ -23,20 +41,28 @@ task('nodejs:install:production', () => {
 })
 
 desc('Builds the application')
-task('nodejs:build', () => {
-  cd('{{build_path}}')
+task('nodejs:build', ({ config }: TaskContext) => {
+  if (config.strategy === Strategy.Build) {
+    cd('{{build_path}}')
+  } else {
+    cd('{{release_path}}')
+  }
   run(`${bin(pm())} run build`)
 })
 
 desc('Runs the test suite')
-task('nodejs:test', () => {
-  cd('{{build_path}}')
+task('nodejs:test', ({ config }: TaskContext) => {
+  if (config.strategy === Strategy.Build) {
+    cd('{{build_path}}')
+  } else {
+    cd('{{release_path}}')
+  }
   run(`${bin(pm())} test`)
 })
 
 after('deploy:update_code', 'nodejs:install')
 after('deploy:build:shared', 'nodejs:build')
 
-if (hasTask('deploy:copy_build')) {
-  after('deploy:copy_build', 'nodejs:install:production')
+if (hasTask('deploy:build:copy')) {
+  after('deploy:build:copy', 'nodejs:install:production')
 }
