@@ -37,7 +37,7 @@ export default defineConfig({
 | `hosts`               | `Host[]`          | List of servers to deploy to                        |
 | `keepReleases?`       | `number`          | Number of releases to keep (default: `5`)           |
 | `repository?`         | `string`          | Git repository URL (auto-detected from origin)      |
-| `strategy?`           | `Strategy`        | Deployment strategy: `Strategy.Build` (default) builds in a separate directory then copies to the release; `Strategy.Direct` installs and builds in the release directory directly |
+| `strategy?`           | `Strategy`        | Deployment strategy: `Strategy.Build` builds in a separate directory then copies to the release; `Strategy.Direct` (default) installs and builds in the release directory directly |
 | `packageManager?`     | `PackageManager`  | Package manager used by `pm()`, `pmInstall()`, `pmInstallProd()` (auto-detected from lock files, defaults to `PackageManager.Npm`) |
 | `hooks?`              | `Hooks`           | Lifecycle hooks (`beforeDeploy`, `afterDeploy`, …)  |
 | `verbose?`            | `0 \| 1 \| 2`    | Verbosity level: `1` prints SSH commands, `2` also prints stdout (default: `1`) |
