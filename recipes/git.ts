@@ -12,12 +12,12 @@ declare module '../src/types.ts' {
 }
 
 desc('Verifies the branch exists on the remote repository')
-task('git:check', async ({ host, deployCtx, logger }: TaskContext) => {
+task('git:check', async ({ host, config, logger }: TaskContext) => {
   if (!host.branch) return
 
   const branchName = typeof host.branch === 'object' ? host.branch.name : host.branch
 
-  let repository = deployCtx.config.repository
+  let repository = config.repository
   if (!repository) {
     if (isVerbose()) logger.cmd('git remote get-url origin')
     repository = (await $`git remote get-url origin`).stdout.trim()
@@ -32,12 +32,12 @@ task('git:check', async ({ host, deployCtx, logger }: TaskContext) => {
 })
 
 desc('Clones the repository or fetches and resets if the target already exists')
-task('deploy:update_code', async ({ host, paths, deployCtx, logger }: TaskContext) => {
+task('deploy:update_code', async ({ host, paths, config, logger }: TaskContext) => {
   if (!host.branch) throw new Error(`[${host.name}] git mode requires "branch" on host`)
 
   const branchName = typeof host.branch === 'object' ? host.branch.name : host.branch
   const cache = paths.repo
-  const target = deployCtx.config.strategy === Strategy.Build ? paths.builder : paths.release
+  const target = config.strategy === Strategy.Build ? paths.builder : paths.release
 
   const targetExists = await ssh(host, `[ -d ${q(target + '/.git')} ] && echo 'yes' || echo 'no'`, {
     quiet: true,
@@ -56,10 +56,10 @@ task('deploy:update_code', async ({ host, paths, deployCtx, logger }: TaskContex
 })
 
 desc('Clones the repository or fetches and checks out if it already exists')
-task('git:update', async ({ host, paths, deployCtx, logger }: TaskContext) => {
+task('git:update', async ({ host, paths, config, logger }: TaskContext) => {
   if (!host.branch) throw new Error(`[${host.name}] git:update requires "branch" on host`)
 
-  let repository = deployCtx.config.repository
+  let repository = config.repository
   const cache = paths.repo
 
   if (!repository) {

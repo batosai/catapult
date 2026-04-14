@@ -23,7 +23,7 @@ declare module './types.ts' {
 // ---------------------------------------------------------------------------
 
 desc('Creates a deploy lock to prevent concurrent deployments')
-task('deploy:lock', async ({ host, deployCtx, paths }: TaskContext) => {
+task('deploy:lock', async ({ host, release, paths }: TaskContext) => {
   try {
     await ssh(
       host,
@@ -33,7 +33,7 @@ task('deploy:lock', async ({ host, deployCtx, paths }: TaskContext) => {
         echo "Deploy lock already present: ${paths.lock}" >&2
         exit 1
       fi
-      echo ${q(deployCtx.release)} > ${q(paths.lock)}
+      echo ${q(release)} > ${q(paths.lock)}
     `,
       { quiet: true }
     )
@@ -111,7 +111,7 @@ task('deploy:publish', () => {
 })
 
 desc('Appends branch, commit and user info to revisions.log')
-task('deploy:log_revision', async ({ host, paths, deployCtx, logger }: TaskContext) => {
+task('deploy:log_revision', async ({ host, paths, release, logger }: TaskContext) => {
   let branch = typeof host.branch === 'object' ? host.branch.name : (host.branch ?? 'unknown')
   if (branch === 'unknown') {
     try {
@@ -130,7 +130,7 @@ task('deploy:log_revision', async ({ host, paths, deployCtx, logger }: TaskConte
   } catch {}
 
   const line = JSON.stringify({
-    release: deployCtx.release,
+    release,
     branch,
     commit,
     user,
@@ -172,7 +172,7 @@ task('deploy:healthcheck', async ({ host, logger }: TaskContext) => {
 })
 
 desc('Removes old releases, keeping the last N defined by keepReleases')
-task('deploy:cleanup', async ({ deployCtx, host, paths }: TaskContext) => {
+task('deploy:cleanup', async ({ config, host, paths }: TaskContext) => {
   await ssh(
     host,
     `
@@ -181,11 +181,11 @@ task('deploy:cleanup', async ({ deployCtx, host, paths }: TaskContext) => {
     cd ${q(paths.releases)}
 
     count=$(ls -1dt */ 2>/dev/null | wc -l | tr -d ' ')
-    if [ "$count" -le ${deployCtx.config.keepReleases} ]; then
+    if [ "$count" -le ${config.keepReleases} ]; then
       exit 0
     fi
 
-    ls -1dt */ | tail -n +$(( ${deployCtx.config.keepReleases} + 1 )) | xargs -r rm -rf
+    ls -1dt */ | tail -n +$(( ${config.keepReleases} + 1 )) | xargs -r rm -rf
   `
   )
 })

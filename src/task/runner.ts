@@ -1,13 +1,14 @@
-import type { Host, DeployContext, Paths } from '../types.ts'
+import type { Host, Config, Paths } from '../types.ts'
 import { Strategy } from '../enums.ts'
 import { ssh } from '../utils.ts'
 import { logger, type CatapultLogger } from '../logger.ts'
 
 export interface TaskContext {
-  host: Host
-  paths: Paths
-  deployCtx: DeployContext
-  logger: CatapultLogger
+  readonly host: Host
+  readonly paths: Paths
+  readonly config: Config
+  readonly logger: CatapultLogger
+  readonly release: string
 }
 
 export type TaskFn = (ctx: TaskContext) => void | Promise<void>
@@ -40,13 +41,13 @@ export class TaskRunner {
   }
 
   isVerbose(): 0 | 1 | 2 {
-    return this.#ctx?.deployCtx.config.verbose ?? 0
+    return this.#ctx?.config.verbose ?? 0
   }
 
   resolve(str: string): string {
     if (!this.#ctx) return str
     const p = this.#ctx.paths
-    const strategy = this.#ctx.deployCtx.config.strategy ?? Strategy.Direct
+    const strategy = this.#ctx.config.strategy ?? Strategy.Direct
     const buildPath = strategy === Strategy.Build ? p.builder : p.release
     return str
       .replace(/\{\{release_path\}\}/g, p.release)
@@ -55,13 +56,13 @@ export class TaskRunner {
       .replace(/\{\{shared_path\}\}/g, p.shared)
       .replace(/\{\{releases_path\}\}/g, p.releases)
       .replace(/\{\{base_path\}\}/g, p.base)
-      .replace(/\{\{release\}\}/g, this.#ctx.deployCtx.release)
+      .replace(/\{\{release\}\}/g, this.#ctx.release)
   }
 
   async flush(): Promise<void> {
     if (!this.#ctx || this.#commands.length === 0) return
     const cmds = this.#commands.splice(0)
-    const verbose = this.#ctx.deployCtx.config.verbose ?? 0
+    const verbose = this.#ctx.config.verbose ?? 0
     if (verbose >= 1) {
       for (const cmd of cmds) logger.cmd(cmd)
     }

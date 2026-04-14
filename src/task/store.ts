@@ -42,7 +42,7 @@ export class TaskStore {
     if (!fn) throw new Error(`Task not found: "${name}"`)
 
     const paths = getPaths(host.deployPath, deployCtx.release)
-    const ctx = { host, paths, deployCtx, logger }
+    const ctx = { host, paths, config: deployCtx.config, release: deployCtx.release, logger }
     this.#runner.set(ctx)
 
     try {
