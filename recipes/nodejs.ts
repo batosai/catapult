@@ -1,5 +1,6 @@
 import type {} from '../src/types.ts'
 import {
+  type TaskContext,
   task,
   hasTask,
   desc,
@@ -10,7 +11,6 @@ import {
   pm,
   pmInstall,
   pmInstallProd,
-  TaskContext,
 } from '../index.ts'
 import { Strategy } from '../src/enums.ts'
 
