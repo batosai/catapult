@@ -47,7 +47,7 @@ export class TaskRunner {
     if (!this.#ctx) return str
     const p = this.#ctx.paths
     const strategy = this.#ctx.deployCtx.config.strategy ?? Strategy.Direct
-    const buildPath = strategy === Strategy.Build ? p.build : p.release
+    const buildPath = strategy === Strategy.Build ? p.builder : p.release
     return str
       .replace(/\{\{release_path\}\}/g, p.release)
       .replace(/\{\{build_path\}\}/g, buildPath)

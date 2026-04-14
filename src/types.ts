@@ -34,7 +34,7 @@ export interface Paths {
   shared: string
   cataConfig: string
   repo: string
-  build: string
+  builder: string
   lock: string
 }
 

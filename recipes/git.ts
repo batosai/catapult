@@ -37,7 +37,7 @@ task('deploy:update_code', async ({ host, paths, deployCtx, logger }: TaskContex
 
   const branchName = typeof host.branch === 'object' ? host.branch.name : host.branch
   const cache = paths.repo
-  const target = deployCtx.config.strategy === Strategy.Build ? paths.build : paths.release
+  const target = deployCtx.config.strategy === Strategy.Build ? paths.builder : paths.release
 
   const targetExists = await ssh(host, `[ -d ${q(target + '/.git')} ] && echo 'yes' || echo 'no'`, {
     quiet: true,
@@ -45,7 +45,10 @@ task('deploy:update_code', async ({ host, paths, deployCtx, logger }: TaskContex
 
   if (targetExists.stdout.trim() === 'yes') {
     if (isVerbose()) logger.cmd(`git fetch ${branchName} + reset --hard FETCH_HEAD → ${target}`)
-    await ssh(host, `set -e\ngit -C ${q(target)} fetch origin ${q(branchName)}\ngit -C ${q(target)} reset --hard FETCH_HEAD`)
+    await ssh(
+      host,
+      `set -e\ngit -C ${q(target)} fetch origin ${q(branchName)}\ngit -C ${q(target)} reset --hard FETCH_HEAD`
+    )
   } else {
     if (isVerbose()) logger.cmd(`git clone ${branchName} → ${target}`)
     await ssh(host, `set -e\ngit clone --local --branch ${q(branchName)} ${q(cache)} ${q(target)}`)

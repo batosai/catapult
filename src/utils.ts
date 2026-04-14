@@ -53,7 +53,7 @@ export function getPaths(baseDir: string, releaseName: string): Paths {
     shared: `${baseDir}/shared`,
     cataConfig: `${baseDir}/.catapult`,
     repo: `${baseDir}/.catapult/repo`,
-    build: `${baseDir}/.catapult/build`,
+    builder: `${baseDir}/.catapult/builder`,
     lock: `${baseDir}/.catapult/deploy.lock`,
   }
 }
