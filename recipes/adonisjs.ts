@@ -1,5 +1,18 @@
 import type {} from '../src/types.ts'
-import { task, desc, cd, run, after, bin, get, set, pmInstall } from '../index.ts'
+import {
+  type TaskContext,
+  task,
+  desc,
+  hasTask,
+  cd,
+  run,
+  after,
+  bin,
+  get,
+  set,
+  pmInstall,
+} from '../index.ts'
+import { Strategy } from '../src/enums.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
@@ -15,26 +28,43 @@ set('shared_files', ['.env'])
 set('adonisjs_path', '')
 
 desc('Installs dependencies')
-task('adonisjs:install', () => {
+task('adonisjs:install', ({ config }: TaskContext) => {
   const adonisjs_path = get('adonisjs_path')
-  cd(`{{release_path}}${adonisjs_path}`)
+  if (config.strategy === Strategy.Build) {
+    cd(`{{build_path}}${adonisjs_path}`)
+  } else {
+    cd(`{{release_path}}${adonisjs_path}`)
+  }
   run(pmInstall())
 })
 
 desc('Builds the AdonisJS application')
-task('adonisjs:build', () => {
+task('adonisjs:build', ({ config }: TaskContext) => {
   const adonisjs_path = get('adonisjs_path')
-  cd(`{{release_path}}${adonisjs_path}`)
+  if (config.strategy === Strategy.Build) {
+    cd(`{{build_path}}${adonisjs_path}`)
+  } else {
+    cd(`{{release_path}}${adonisjs_path}`)
+  }
   run(`${bin('node')} ace build`)
 })
 
 desc('Runs database migrations')
-task('adonisjs:migrate', () => {
+task('adonisjs:migrate', ({ config }: TaskContext) => {
   const adonisjs_path = get('adonisjs_path')
-  cd(`{{release_path}}${adonisjs_path}`)
+  if (config.strategy === Strategy.Build) {
+    cd(`{{build_path}}${adonisjs_path}`)
+  } else {
+    cd(`{{release_path}}${adonisjs_path}`)
+  }
   run(`${bin('node')} ace migration:run`)
 })
 
 after('deploy:shared', 'adonisjs:install')
 after('adonisjs:install', 'adonisjs:build')
-after('adonisjs:build', 'adonisjs:migrate')
+
+if (hasTask('deploy:build:copy')) {
+  after('deploy:build:copy', 'adonisjs:migrate')
+} else {
+  after('adonisjs:build', 'adonisjs:migrate')
+}
