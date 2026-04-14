@@ -6,7 +6,7 @@ export class PipelineStore {
     'deploy:release',
     'deploy:update_code',
     'deploy:build:shared',
-    'deploy:copy_build',
+    'deploy:build:copy',
     'deploy:shared',
     'deploy:publish',
     'deploy:log_revision',

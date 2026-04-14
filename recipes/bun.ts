@@ -29,6 +29,6 @@ task('bun:build', () => {
 after('deploy:update_code', 'bun:install')
 after('deploy:build:shared', 'bun:build')
 
-if (hasTask('deploy:copy_build')) {
-  after('deploy:copy_build', 'bun:install:production')
+if (hasTask('deploy:build:copy')) {
+  after('deploy:build:copy', 'bun:install:production')
 }

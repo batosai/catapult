@@ -8,7 +8,7 @@ declare module './types.ts' {
     'deploy:lock': true
     'deploy:release': true
     'deploy:update_code': true
-    'deploy:copy_build': true
+    'deploy:build:copy': true
     'deploy:shared': true
     'deploy:publish': true
     'deploy:log_revision': true
@@ -100,7 +100,7 @@ task('deploy:build:shared', () => {
 })
 
 desc('Copies build output from build directory to the release')
-task('deploy:copy_build', () => {
+task('deploy:build:copy', () => {
   const output: string = get('build_output', 'build')
   run(`cp -r {{build_path}}/${output}/. {{release_path}}/`)
 })

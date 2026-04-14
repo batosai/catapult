@@ -29,7 +29,7 @@ export function defineConfig(config: Config): () => Promise<void> {
 
     const strategy = config.strategy ?? Strategy.Build
     if (strategy !== Strategy.Build) {
-      remove('deploy:copy_build')
+      remove('deploy:build:copy')
       remove('deploy:build:shared')
     }
   }
