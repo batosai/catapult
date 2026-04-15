@@ -46,6 +46,10 @@
       "types": "./build/index.d.ts",
       "import": "./build/index.js"
     },
+    "./types": {
+      "types": "./build/src/types.d.ts",
+      "import": "./build/src/types.js"
+    },
     "./utils": {
       "types": "./build/src/utils.d.ts",
       "import": "./build/src/utils.js"
