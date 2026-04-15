@@ -4,6 +4,13 @@ description: Catapult changelog — release history and notable changes.
 
 # Changelog
 
+## 0.2.0
+
+- Added `catapult/types` export — types can now be imported directly from `catapult/types`
+- `recipes/adonisjs`: `adonisjs:migrate` now runs before `deploy:publish` regardless of the active strategy — replaces the previous `hasTask` conditional that placed it after `deploy:build:copy` or `adonisjs:build`
+- Fixed: `adonisjs:migrate` now passes `--force` to `ace migration:run`, which is required in non-interactive deployment environments
+- Fixed: default `strategy` was incorrectly falling back to `Strategy.Build` instead of `Strategy.Direct` when not set in `defineConfig`
+
 ## 0.1.0
 
 - Added `Strategy` enum (`Strategy.Build` | `Strategy.Direct`) — controls where install/build tasks run before being copied to the release
