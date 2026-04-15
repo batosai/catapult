@@ -299,6 +299,20 @@ remove('deploy:log_revision')
 
 ---
 
+### `inPipeline(name)`
+
+Returns `true` if the task is present in the current pipeline.
+
+```typescript
+if (inPipeline('deploy:build:copy')) {
+  after('deploy:build:copy', 'my:task')
+} else {
+  after('deploy:shared', 'my:task')
+}
+```
+
+---
+
 ### `onSetup(fn)`
 
 Registers a callback to run during `cata deploy:setup`, after the base directories are created. Useful for creating shared directories or files specific to your application.

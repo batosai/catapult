@@ -2,8 +2,7 @@ import type { Config } from './types.ts'
 import { Strategy } from './enums.ts'
 import { Context } from './context.ts'
 import { detectPackageManager } from './utils.ts'
-import { remove, getPipeline } from './pipeline.ts'
-import { hasTask } from './task.ts'
+import { remove, getPipeline, inPipeline } from './pipeline.ts'
 import './defaults.ts'
 
 const initialConfigValues = {
@@ -30,8 +29,8 @@ export function defineConfig(config: Config): () => Promise<void> {
 
     const strategy = config.strategy ?? initialConfigValues.strategy
     if (strategy !== Strategy.Build) {
-      if (hasTask('deploy:build:copy')) remove('deploy:build:copy')
-      if (hasTask('deploy:build:shared')) remove('deploy:build:shared')
+      if (inPipeline('deploy:build:copy')) remove('deploy:build:copy')
+      if (inPipeline('deploy:build:shared')) remove('deploy:build:shared')
     }
   }
 }

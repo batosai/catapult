@@ -1,4 +1,15 @@
-import { task, hasTask, desc, cd, run, bin, after, pm, pmInstall, pmInstallProd } from '../index.ts'
+import {
+  task,
+  inPipeline,
+  desc,
+  cd,
+  run,
+  bin,
+  after,
+  pm,
+  pmInstall,
+  pmInstallProd,
+} from '../index.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
@@ -29,6 +40,6 @@ task('bun:build', () => {
 after('deploy:update_code', 'bun:install')
 after('deploy:build:shared', 'bun:build')
 
-if (hasTask('deploy:build:copy')) {
+if (inPipeline('deploy:build:copy')) {
   after('deploy:build:copy', 'bun:install:production')
 }

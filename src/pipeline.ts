@@ -26,6 +26,11 @@ export function after(existing: TaskName, newTask: TaskName): void {
   pipeline.after(existing, newTask)
 }
 
+/** Returns true if the task is present in the pipeline. */
+export function inPipeline(name: TaskName): boolean {
+  return pipeline.has(name)
+}
+
 /** Removes a task from the pipeline. */
 export function remove(name: TaskName): void {
   pipeline.remove(name)

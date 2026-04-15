@@ -2,7 +2,7 @@ import type {} from '../src/types.ts'
 import {
   type TaskContext,
   task,
-  hasTask,
+  inPipeline,
   desc,
   cd,
   run,
@@ -63,6 +63,6 @@ task('nodejs:test', ({ config }: TaskContext) => {
 after('deploy:update_code', 'nodejs:install')
 after('deploy:build:shared', 'nodejs:build')
 
-if (hasTask('deploy:build:copy')) {
+if (inPipeline('deploy:build:copy')) {
   after('deploy:build:copy', 'nodejs:install:production')
 }

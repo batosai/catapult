@@ -58,6 +58,20 @@ import { remove } from '@catapultjs/deploy'
 remove('deploy:healthcheck')
 ```
 
+## Checking if a task is in the pipeline
+
+Use `inPipeline()` to conditionally insert a task depending on the active strategy:
+
+```typescript
+import { inPipeline, after } from '@catapultjs/deploy'
+
+if (inPipeline('deploy:build:copy')) {
+  after('deploy:build:copy', 'my:task')
+} else {
+  after('deploy:shared', 'my:task')
+}
+```
+
 ## Replacing the entire pipeline
 
 ```typescript

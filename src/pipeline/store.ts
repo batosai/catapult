@@ -35,6 +35,10 @@ export class PipelineStore {
     this.#pipeline.splice(idx + 1, 0, newTask)
   }
 
+  has(name: TaskName): boolean {
+    return this.#pipeline.includes(name)
+  }
+
   remove(name: TaskName): void {
     const idx = this.#pipeline.indexOf(name)
     if (idx === -1) throw new Error(`Task "${name}" not found in pipeline`)
