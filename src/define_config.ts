@@ -27,7 +27,7 @@ export function defineConfig(config: Config): () => Promise<void> {
       remove('deploy:healthcheck')
     }
 
-    const strategy = config.strategy ?? Strategy.Direct
+    const strategy = config.strategy ?? initialConfigValues.strategy
     if (strategy !== Strategy.Build) {
       remove('deploy:build:copy')
       remove('deploy:build:shared')
