@@ -1,7 +1,7 @@
 import type { Host } from '../src/types.ts'
 import { execa } from 'execa'
 import { Context } from '../src/context.ts'
-import { resolveSshArgs, sshControlArgs } from '../src/utils.ts'
+import { resolveSshArgs, sshControlArgs, q } from '../src/utils.ts'
 import { BaseDeployCommand } from '../src/base_command.ts'
 
 export default class Ssh extends BaseDeployCommand {
@@ -44,8 +44,13 @@ export default class Ssh extends BaseDeployCommand {
     const host = await this.selectHost()
     if (!host) return
 
-    const args = [...sshControlArgs(host), ...resolveSshArgs(host)]
+    const sshArgs = [
+      '-t',
+      ...sshControlArgs(host),
+      ...resolveSshArgs(host),
+      `cd ${q(host.deployPath)} && exec $SHELL`,
+    ]
 
-    await execa('ssh', args, { stdio: 'inherit' })
+    await execa('ssh', sshArgs, { stdio: 'inherit' })
   }
 }
