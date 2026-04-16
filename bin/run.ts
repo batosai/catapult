@@ -12,6 +12,7 @@ import Deploy from '../commands/deploy.js'
 import Rollback from '../commands/rollback.js'
 import Status from '../commands/status.js'
 import ListReleases from '../commands/list_releases.js'
+import ListRevisions from '../commands/list_revisions.js'
 import ListTasks from '../commands/list_tasks.js'
 import Pipeline from '../commands/pipeline.js'
 import RunTask from '../commands/run_task.js'
@@ -104,6 +105,7 @@ kernel.addLoader(
     Rollback,
     Status,
     ListReleases,
+    ListRevisions,
     ListTasks,
     Pipeline,
     RunTask,
