@@ -28,6 +28,7 @@ Edit the generated `deploy.ts` file, or create it manually:
 
 ```typescript
 import { defineConfig } from '@catapultjs/deploy'
+import { Verbose } from '@catapultjs/deploy/enums'
 import '@catapultjs/deploy/recipes/git'
 import '@catapultjs/deploy/recipes/adonisjs'
 import '@catapultjs/deploy/recipes/pm2'
@@ -65,7 +66,7 @@ export default defineConfig({
     },
   ],
 
-  verbose: 1, // 0: silent, 1: print SSH commands, 2: print SSH commands + stdout
+  verbose: Verbose.NORMAL, // Verbose.SILENT | Verbose.NORMAL | Verbose.DEBUG
 })
 ```
 
@@ -97,6 +98,9 @@ npx cata status
 # List releases
 npx cata list:releases
 
+# List the last 10 revisions (branch, commit, author, date)
+npx cata list:revisions
+
 # Show the current deployment pipeline
 npx cata pipeline
 
@@ -113,7 +117,7 @@ npx cata task <task-name> -v
 npx cata run "pm2 list"
 npx cata run "pm2 list" --host production
 
-# Open an interactive SSH session on a host
+# Open an interactive SSH session on a host (opens in deployPath)
 npx cata ssh
 
 # Target a specific host
@@ -140,7 +144,7 @@ After `cata deploy:setup`, the server will have the following structure:
     tmp/            (AdonisJS recipe)
   .catapult/
     repo/           ← bare git mirror (git recipe)
-    builder/        ← build workspace (Strategy.Build)
+    builder/        ← build workspace (Strategy.BUILD)
     revisions.log   ← JSON deployment history
     deploy.lock     ← present during a deployment
 ```

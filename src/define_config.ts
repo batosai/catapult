@@ -1,5 +1,5 @@
 import type { Config } from './types.ts'
-import { Strategy } from './enums.ts'
+import { Strategy, Verbose } from './enums.ts'
 import { Context } from './context.ts'
 import { detectPackageManager } from './utils.ts'
 import { remove, getPipeline, inPipeline } from './pipeline.ts'
@@ -7,8 +7,8 @@ import './defaults.ts'
 
 const initialConfigValues = {
   keepReleases: 5,
-  verbose: 1 as const,
-  strategy: Strategy.Direct,
+  verbose: Verbose.NORMAL,
+  strategy: Strategy.DIRECT,
 }
 
 export function defineConfig(config: Config): () => Promise<void> {
@@ -28,7 +28,7 @@ export function defineConfig(config: Config): () => Promise<void> {
     }
 
     const strategy = config.strategy ?? initialConfigValues.strategy
-    if (strategy !== Strategy.Build) {
+    if (strategy !== Strategy.BUILD) {
       if (inPipeline('deploy:build:copy')) remove('deploy:build:copy')
       if (inPipeline('deploy:build:shared')) remove('deploy:build:shared')
     }

@@ -1,13 +1,20 @@
 export const Strategy = {
-  Build: 'build',
-  Direct: 'direct',
+  BUILD: 'build',
+  DIRECT: 'direct',
 } as const
 export type Strategy = (typeof Strategy)[keyof typeof Strategy]
 
 export const PackageManager = {
-  Npm: 'npm',
-  Pnpm: 'pnpm',
-  Yarn: 'yarn',
-  Bun: 'bun',
+  NPM: 'npm',
+  PNPM: 'pnpm',
+  YARN: 'yarn',
+  BUN: 'bun',
 } as const
 export type PackageManager = (typeof PackageManager)[keyof typeof PackageManager]
+
+export const Verbose = {
+  SILENT: 0,
+  NORMAL: 1,
+  DEBUG: 2,
+} as const
+export type Verbose = (typeof Verbose)[keyof typeof Verbose]

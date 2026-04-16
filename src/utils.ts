@@ -10,11 +10,11 @@ import { logger } from './logger.ts'
 const DEPLOY_CANDIDATES = ['deploy.ts', 'deploy.js']
 
 const PM_LOCK_FILES: [string, PackageManager][] = [
-  ['bun.lock', PackageManager.Bun],
-  ['bun.lockb', PackageManager.Bun],
-  ['pnpm-lock.yaml', PackageManager.Pnpm],
-  ['yarn.lock', PackageManager.Yarn],
-  ['package-lock.json', PackageManager.Npm],
+  ['bun.lock', PackageManager.BUN],
+  ['bun.lockb', PackageManager.BUN],
+  ['pnpm-lock.yaml', PackageManager.PNPM],
+  ['yarn.lock', PackageManager.YARN],
+  ['package-lock.json', PackageManager.NPM],
 ]
 
 /** Detects the package manager by checking for lock files in the given directory. */
@@ -25,7 +25,7 @@ export async function detectPackageManager(cwd = process.cwd()): Promise<Package
       return manager
     } catch {}
   }
-  return PackageManager.Npm
+  return PackageManager.NPM
 }
 
 /** Returns the path of the first existing deploy config file, or null if none found. */

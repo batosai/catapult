@@ -10,6 +10,12 @@ description: Complete API reference for @catapultjs/deploy — all exported func
 
 All functions are exported from `@catapultjs/deploy`.
 
+Enums (`Strategy`, `PackageManager`, `Verbose`) are available from a dedicated entry point:
+
+```typescript
+import { Strategy, PackageManager, Verbose } from '@catapultjs/deploy/enums'
+```
+
 ## Configuration
 
 ### `defineConfig(config)`
@@ -37,10 +43,10 @@ export default defineConfig({
 | `hosts`           | `Host[]`         | List of servers to deploy to                                                                                                                                                       |
 | `keepReleases?`   | `number`         | Number of releases to keep (default: `5`)                                                                                                                                          |
 | `repository?`     | `string`         | Git repository URL (auto-detected from origin)                                                                                                                                     |
-| `strategy?`       | `Strategy`       | Deployment strategy: `Strategy.Build` builds in a separate directory then copies to the release; `Strategy.Direct` (default) installs and builds in the release directory directly |
-| `packageManager?` | `PackageManager` | Package manager used by `pm()`, `pmInstall()`, `pmInstallProd()` (auto-detected from lock files, defaults to `PackageManager.Npm`)                                                 |
+| `strategy?`       | `Strategy`       | Deployment strategy: `Strategy.BUILD` builds in a separate directory then copies to the release; `Strategy.DIRECT` (default) installs and builds in the release directory directly |
+| `packageManager?` | `PackageManager` | Package manager used by `pm()`, `pmInstall()`, `pmInstallProd()` (auto-detected from lock files, defaults to `PackageManager.NPM`)                                                 |
 | `hooks?`          | `Hooks`          | Lifecycle hooks (`beforeDeploy`, `afterDeploy`, …)                                                                                                                                 |
-| `verbose?`        | `0 \| 1 \| 2`    | Verbosity level: `1` prints SSH commands, `2` also prints stdout (default: `1`)                                                                                                    |
+| `verbose?`        | `Verbose`        | Verbosity level: `Verbose.NORMAL` prints SSH commands, `Verbose.DEBUG` also prints stdout (default: `Verbose.NORMAL`)                                                              |
 
 **Host options**
 

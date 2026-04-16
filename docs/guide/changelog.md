@@ -4,17 +4,25 @@ description: Catapult changelog — release history and notable changes.
 
 # Changelog
 
+## 0.3.0
+
+- Added `list:revisions` command — displays the last 10 deployments from `.catapult/revisions.log` in a table (release, branch, commit, author, date)
+- `ssh` command now opens the session directly in `deployPath` instead of the home directory
+- Removed `--ansi` global flag — it only affected Ace's UI components, not the deploy logger, so it was misleading
+- Added `Verbose` enum (`Verbose.SILENT`, `Verbose.NORMAL`, `Verbose.DEBUG`) — replaces the raw `0 | 1 | 2` type for the `verbose` config option; available via `@catapultjs/deploy/enums`
+- Added `@catapultjs/deploy/enums` export — exposes `Strategy`, `PackageManager` and `Verbose`
+
 ## 0.2.0
 
 - Added `catapult/types` export — types can now be imported directly from `catapult/types`
 - `recipes/adonisjs`: `adonisjs:migrate` now runs before `deploy:publish` regardless of the active strategy — replaces the previous `hasTask` conditional that placed it after `deploy:build:copy` or `adonisjs:build`
 - Fixed: `adonisjs:migrate` now passes `--force` to `ace migration:run`, which is required in non-interactive deployment environments
-- Fixed: default `strategy` was incorrectly falling back to `Strategy.Build` instead of `Strategy.Direct` when not set in `defineConfig`
+- Fixed: default `strategy` was incorrectly falling back to `Strategy.BUILD` instead of `Strategy.DIRECT` when not set in `defineConfig`
 
 ## 0.1.0
 
-- Added `Strategy` enum (`Strategy.Build` | `Strategy.Direct`) — controls where install/build tasks run before being copied to the release
-- Added `strategy` option to `defineConfig` (default: `Strategy.Direct`) — when set to `Strategy.Build`, two new tasks are inserted into the pipeline: `deploy:build:shared` (symlinks shared paths into the build directory) and `deploy:build:copy` (copies build output into the release)
+- Added `Strategy` enum (`Strategy.BUILD` | `Strategy.DIRECT`) — controls where install/build tasks run before being copied to the release
+- Added `strategy` option to `defineConfig` (default: `Strategy.DIRECT`) — when set to `Strategy.BUILD`, two new tasks are inserted into the pipeline: `deploy:build:shared` (symlinks shared paths into the build directory) and `deploy:build:copy` (copies build output into the release)
 - Added `{{builder_path}}` template variable — resolves to `{deployPath}/.catapult/builder`
 - Added `git:update` task in `recipes/git` — maintains a cached bare mirror of the repository on the server; `deploy:update_code` now clones from this local mirror instead of the remote
 - `TaskContext`: replaced `deployCtx` with two top-level fields — `config` (the resolved config object) and `release` (the release name string)

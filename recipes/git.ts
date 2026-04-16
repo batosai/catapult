@@ -38,7 +38,7 @@ task('deploy:update_code', async ({ host, paths, config, logger }: TaskContext) 
 
   const branchName = typeof host.branch === 'object' ? host.branch.name : host.branch
   const cache = paths.repo
-  const target = config.strategy === Strategy.Build ? paths.builder : paths.release
+  const target = config.strategy === Strategy.BUILD ? paths.builder : paths.release
 
   const targetExists = await ssh(host, `[ -d ${q(target + '/.git')} ] && echo 'yes' || echo 'no'`, {
     quiet: true,

@@ -23,11 +23,7 @@ export default class ListRevisions extends BaseDeployCommand {
         `set +e\n[ -f ${q(logFile)} ] && tail -10 ${q(logFile)} || true`
       )
 
-      const lines = stdout
-        .trim()
-        .split('\n')
-        .filter(Boolean)
-        .reverse()
+      const lines = stdout.trim().split('\n').filter(Boolean).reverse()
 
       const table = this.ui.table()
       table.head(['Release', 'Branch', 'Commit', 'By', 'Date'])

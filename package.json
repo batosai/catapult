@@ -50,6 +50,10 @@
       "types": "./build/src/types.d.ts",
       "import": "./build/src/types.js"
     },
+    "./enums": {
+      "types": "./build/src/enums.d.ts",
+      "import": "./build/src/enums.js"
+    },
     "./utils": {
       "types": "./build/src/utils.d.ts",
       "import": "./build/src/utils.js"

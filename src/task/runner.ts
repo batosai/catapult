@@ -1,5 +1,5 @@
 import type { Host, Config, Paths } from '../types.ts'
-import { Strategy } from '../enums.ts'
+import { Strategy, Verbose } from '../enums.ts'
 import { ssh } from '../utils.ts'
 import { logger, type CatapultLogger } from '../logger.ts'
 
@@ -47,8 +47,8 @@ export class TaskRunner {
   resolve(str: string): string {
     if (!this.#ctx) return str
     const p = this.#ctx.paths
-    const strategy = this.#ctx.config.strategy ?? Strategy.Direct
-    const buildPath = strategy === Strategy.Build ? p.builder : p.release
+    const strategy = this.#ctx.config.strategy ?? Strategy.DIRECT
+    const buildPath = strategy === Strategy.BUILD ? p.builder : p.release
     return str
       .replace(/\{\{release_path\}\}/g, p.release)
       .replace(/\{\{builder_path\}\}/g, buildPath)
@@ -62,12 +62,12 @@ export class TaskRunner {
   async flush(): Promise<void> {
     if (!this.#ctx || this.#commands.length === 0) return
     const cmds = this.#commands.splice(0)
-    const verbose = this.#ctx.config.verbose ?? 0
-    if (verbose >= 1) {
+    const verbose = this.#ctx.config.verbose ?? Verbose.SILENT
+    if (verbose >= Verbose.NORMAL) {
       for (const cmd of cmds) logger.cmd(cmd)
     }
     const subprocess = ssh(this.#ctx.host, ['set -e', ...cmds].join('\n'), { color: true })
-    if (verbose >= 2) subprocess.stdout?.pipe(process.stdout)
+    if (verbose >= Verbose.DEBUG) subprocess.stdout?.pipe(process.stdout)
     await subprocess
   }
 }

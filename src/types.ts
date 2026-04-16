@@ -1,4 +1,4 @@
-import type { Strategy, PackageManager } from './enums.ts'
+import type { Strategy, PackageManager, Verbose } from './enums.ts'
 
 export interface BranchWithPrompt {
   name: string
@@ -62,7 +62,7 @@ export interface Config {
   hosts: Host[]
 
   hooks?: Hooks
-  verbose?: 0 | 1 | 2
+  verbose?: Verbose
 }
 
 export interface DeployContext {
