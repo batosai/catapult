@@ -4,6 +4,12 @@ description: Catapult changelog — release history and notable changes.
 
 # Changelog
 
+## 0.5.0
+
+- `rollback` command now accepts `--interactive` / `-i` flag — lists available releases and prompts for selection, with the current release marked and disabled
+- `--host` flag now has a `-H` short alias — available on all commands
+- `--branch` flag on `deploy` now has a `-b` short alias
+
 ## 0.4.0
 
 - Added `Verbose.TRACE` level (`2`) between `NORMAL` and `DEBUG` — `NORMAL` now only shows task progress, `TRACE` shows SSH commands, `DEBUG` streams stdout; existing indices shifted (`DEBUG` is now `3`)
