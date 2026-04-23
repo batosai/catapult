@@ -8,7 +8,7 @@ export default class Deploy extends BaseDeployCommand {
   static aliases = ['dep']
   static description = 'Deploy to servers'
 
-  @flags.string({ description: 'Override the branch to deploy' })
+  @flags.string({ alias: 'b', description: 'Override the branch to deploy' })
   declare branch: string | undefined
 
   @flags.boolean({ alias: 'v', description: 'Verbose output (-v, -vv, -vvv)' })

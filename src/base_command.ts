@@ -3,7 +3,7 @@ import { BaseCommand, flags } from '@adonisjs/ace'
 import { Context } from './context.ts'
 
 export abstract class BaseDeployCommand extends BaseCommand {
-  @flags.string({ description: 'Target a specific host' })
+  @flags.string({ alias: 'H', description: 'Target a specific host' })
   declare host: string | undefined
 
   protected async selectHosts(): Promise<Host[] | null> {
