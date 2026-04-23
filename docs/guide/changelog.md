@@ -12,6 +12,8 @@ description: Catapult changelog — release history and notable changes.
 - Added `local(command, options?)` to the task DSL — executes a shell command on the local machine, with optional `cwd`; flushes queued SSH commands first
 - Fixed `upload()` and `download()` not interpolating template variables (e.g. `{{release_path}}`) in `remotePath`
 
+> Released at *2026-04-23*
+
 ## 0.4.0
 
 - Added `Verbose.TRACE` level (`2`) between `NORMAL` and `DEBUG` — `NORMAL` now only shows task progress, `TRACE` shows SSH commands, `DEBUG` streams stdout; existing indices shifted (`DEBUG` is now `3`)
@@ -21,6 +23,8 @@ description: Catapult changelog — release history and notable changes.
 - Added `upload(localPath, remotePath)` and `download(remotePath, localPath)` to the task DSL — transfer files via SCP, reusing the SSH multiplexing socket
 - `upload()` and `download()` now resolve relative `remotePath` values against `host.deployPath`
 
+> Released at *2026-04-23*
+
 ## 0.3.0
 
 - Added `list:revisions` command — displays the last 10 deployments from `.catapult/revisions.log` in a table (release, branch, commit, author, date)
@@ -29,12 +33,16 @@ description: Catapult changelog — release history and notable changes.
 - Added `Verbose` enum (`Verbose.SILENT`, `Verbose.NORMAL`, `Verbose.DEBUG`) — replaces the raw `0 | 1 | 2` type for the `verbose` config option; available via `@catapultjs/deploy/enums`
 - Added `@catapultjs/deploy/enums` export — exposes `Strategy`, `PackageManager` and `Verbose`
 
+> Released at *2026-04-17*
+
 ## 0.2.0
 
 - Added `catapult/types` export — types can now be imported directly from `catapult/types`
 - `recipes/adonisjs`: `adonisjs:migrate` now runs before `deploy:publish` regardless of the active strategy — replaces the previous `hasTask` conditional that placed it after `deploy:build:copy` or `adonisjs:build`
 - Fixed: `adonisjs:migrate` now passes `--force` to `ace migration:run`, which is required in non-interactive deployment environments
 - Fixed: default `strategy` was incorrectly falling back to `Strategy.BUILD` instead of `Strategy.DIRECT` when not set in `defineConfig`
+
+> Released at *2026-04-15*
 
 ## 0.1.0
 
@@ -53,6 +61,8 @@ description: Catapult changelog — release history and notable changes.
 - `recipes/nodejs`, `recipes/bun`: tasks now operate on `{{builder_path}}` when `strategy` is `Build`; pipeline positions updated (`nodejs:install`/`bun:install` after `deploy:update_code`, build task after `deploy:build:shared`)
 - `recipes/adonisjs`: tasks are now strategy-aware; `adonisjs:migrate` is inserted after `deploy:build:copy` when using the Build strategy
 
+> Released at *2026-04-15*
+
 ## 0.0.6
 
 - Added `run` command — executes a shell command on one or more hosts via SSH (`npx cata run "pm2 list"`)
@@ -60,6 +70,8 @@ description: Catapult changelog — release history and notable changes.
 - Added `afterFailure` hook — called when a deployment fails, receives `{ hosts, error }`
 - `packageManager` is now auto-detected from lock files (`bun.lock`, `pnpm-lock.yaml`, `yarn.lock`, `package-lock.json`) if not set in `defineConfig`
 - `recipes/pm2`: added `pm2:delete` task — deletes all processes from PM2
+
+> Released at *2026-04-11*
 
 ## 0.0.5
 
@@ -69,6 +81,8 @@ description: Catapult changelog — release history and notable changes.
 - `pmInstall()` and `pmInstallProd()` now handle `bun` (`bun install --frozen-lockfile`, `bun install --production`)
 - `healthcheckUrl`, `healthcheckRetries` and `healthcheckDelayMs` replaced by a `healthcheck` object on each `Host` (`{ url?, retries?, delayMs? }`) — allows per-host healthcheck configuration
 - `keepReleases` is now optional in `defineConfig` (default: `5`)
+
+> Released at *2026-04-10*
 
 ## 0.0.4
 
@@ -80,6 +94,8 @@ description: Catapult changelog — release history and notable changes.
 - `task` command now accepts `-v` / `-vv` verbose flags (consistent with `deploy`)
 - Fixed: `deploy:unlock` is no longer called when `deploy:lock` itself fails — a lock held by another deployment is no longer removed on error
 
+> Released at *2026-04-09*
+
 ## 0.0.3
 
 - `verbose` config option changed from `boolean` to `0 | 1 | 2`: level `1` prints SSH commands, level `2` also streams stdout
@@ -88,12 +104,16 @@ description: Catapult changelog — release history and notable changes.
 - `recipes/pm2`: `pm2:start` and `pm2:save` refactored to use `cd()`/`run()` DSL
 - `deploy:shared`: leading slashes are now stripped from `shared_dirs` and `shared_files` entries to prevent double slashes in paths
 
+> Released at *2026-04-08*
+
 ## 0.0.2
 
 - `deploy:healthcheck` is now automatically removed from the pipeline when no host defines a `healthcheckUrl`
 - Added `detectPackageManager` — the `cata init` and `cata status` commands now auto-detect the package manager from lock files
 - Internal refactoring: task runner and store split into dedicated classes
 - Added unit tests
+
+> Released at *2026-04-05*
 
 ## 0.0.1
 
@@ -109,3 +129,5 @@ Initial release.
 - Automatic rollback on deployment failure
 - Multi-server support with host selection prompt
 - `--host` and `--branch` CLI flags
+
+> Released at *2026-04-03*
