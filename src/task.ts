@@ -53,6 +53,10 @@ export function isVerbose(level: Verbose): boolean {
   return runner.isVerbose(level)
 }
 
+export function local(command: string, options: { cwd?: string } = {}): Promise<void> {
+  return runner.local(command, options)
+}
+
 export function upload(localPath: string, remotePath: string): Promise<void> {
   return runner.upload(localPath, remotePath)
 }

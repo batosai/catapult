@@ -231,6 +231,27 @@ Per-host binary paths are configured in `defineConfig`:
 
 ---
 
+### `local(command, options?)`
+
+Executes a shell command on the local machine. Flushes any queued `run()` commands first.
+Prints the command at `Verbose.TRACE` level and streams stdout at `Verbose.DEBUG` level.
+
+| Option | Type     | Description                                                     |
+| ------ | -------- | --------------------------------------------------------------- |
+| `cwd?` | `string` | Working directory for the command (defaults to `process.cwd()`) |
+
+```typescript
+task('my:task', async () => {
+  await local('npm run build')
+  await local('npm run test', { cwd: './frontend' })
+  await upload('./dist', '{{release_path}}/dist')
+})
+```
+
+Must be called inside an `async` task callback.
+
+---
+
 ### `upload(localPath, remotePath)`
 
 Uploads a local file or directory to the remote server via SCP. Flushes any queued `run()` commands first.

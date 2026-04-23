@@ -9,6 +9,8 @@ description: Catapult changelog — release history and notable changes.
 - `rollback` command now accepts `--interactive` / `-i` flag — lists available releases and prompts for selection, with the current release marked and disabled
 - `--host` flag now has a `-H` short alias — available on all commands
 - `--branch` flag on `deploy` now has a `-b` short alias
+- Added `local(command, options?)` to the task DSL — executes a shell command on the local machine, with optional `cwd`; flushes queued SSH commands first
+- Fixed `upload()` and `download()` not interpolating template variables (e.g. `{{release_path}}`) in `remotePath`
 
 ## 0.4.0
 

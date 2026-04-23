@@ -61,13 +61,24 @@ export class TaskRunner {
       .replace(/\{\{release\}\}/g, this.#ctx.release)
   }
 
+  async local(command: string, options: { cwd?: string } = {}): Promise<void> {
+    await this.flush()
+    if (!this.#ctx) throw new Error('local() must be called inside a task')
+    const verbose = this.#ctx.config.verbose ?? Verbose.SILENT
+    if (verbose >= Verbose.TRACE) logger.cmd(command)
+    const subprocess = $({ shell: true, cwd: options.cwd })`${command}`
+    if (verbose >= Verbose.DEBUG) subprocess.stdout?.pipe(process.stdout)
+    await subprocess
+  }
+
   async upload(localPath: string, remotePath: string): Promise<void> {
     await this.flush()
     if (!this.#ctx) throw new Error('upload() must be called inside a task')
     const args = ['-r', ...scpArgs(this.#ctx.host)]
-    const resolved = posix.isAbsolute(remotePath)
-      ? remotePath
-      : posix.join(this.#ctx.host.deployPath, remotePath)
+    const expanded = this.resolve(remotePath)
+    const resolved = posix.isAbsolute(expanded)
+      ? expanded
+      : posix.join(this.#ctx.host.deployPath, expanded)
     const target = `${scpTarget(this.#ctx.host)}:${resolved}`
     await $`scp ${args} ${localPath} ${target}`
   }
@@ -76,9 +87,10 @@ export class TaskRunner {
     await this.flush()
     if (!this.#ctx) throw new Error('download() must be called inside a task')
     const args = ['-r', ...scpArgs(this.#ctx.host)]
-    const resolved = posix.isAbsolute(remotePath)
-      ? remotePath
-      : posix.join(this.#ctx.host.deployPath, remotePath)
+    const expanded = this.resolve(remotePath)
+    const resolved = posix.isAbsolute(expanded)
+      ? expanded
+      : posix.join(this.#ctx.host.deployPath, expanded)
     const source = `${scpTarget(this.#ctx.host)}:${resolved}`
     await $`scp ${args} ${source} ${localPath}`
   }
