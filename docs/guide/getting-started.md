@@ -150,7 +150,7 @@ After `cata deploy:setup`, the server will have the following structure:
     tmp/            (AdonisJS recipe)
   .catapult/
     repo/           ← bare git mirror (git recipe)
-    builder/        ← build workspace (Strategy.BUILD)
+    builder/        ← build workspace (Strategy.REMOTE)
     revisions.log   ← JSON deployment history
     deploy.lock     ← present during a deployment
 ```

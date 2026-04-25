@@ -35,11 +35,15 @@ task('git:check', async ({ host, config, logger }: TaskContext) => {
 
 desc('Clones the repository or fetches and resets if the target already exists')
 task('deploy:update_code', async ({ host, paths, config, logger }: TaskContext) => {
+  if (config.strategy === Strategy.LOCAL)
+    throw new Error(
+      `[${host.name}] git recipe is not compatible with Strategy.LOCAL — use the default deploy:update_code or the rsync recipe instead`
+    )
   if (!host.branch) throw new Error(`[${host.name}] git mode requires "branch" on host`)
 
   const branchName = typeof host.branch === 'object' ? host.branch.name : host.branch
   const cache = paths.repo
-  const target = config.strategy === Strategy.BUILD ? paths.builder : paths.release
+  const target = config.strategy === Strategy.REMOTE ? paths.builder : paths.release
 
   const targetExists = await ssh(host, `[ -d ${q(target + '/.git')} ] && echo 'yes' || echo 'no'`, {
     quiet: true,

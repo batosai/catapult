@@ -8,7 +8,7 @@ import './defaults.ts'
 const initialConfigValues = {
   keepReleases: 5,
   verbose: Verbose.NORMAL,
-  strategy: Strategy.DIRECT,
+  strategy: Strategy.LOCAL,
 }
 
 export function defineConfig(config: Config): () => Promise<void> {
@@ -28,7 +28,7 @@ export function defineConfig(config: Config): () => Promise<void> {
     }
 
     const strategy = config.strategy ?? initialConfigValues.strategy
-    if (strategy !== Strategy.BUILD) {
+    if (strategy !== Strategy.REMOTE) {
       if (inPipeline('deploy:build:copy')) remove('deploy:build:copy')
       if (inPipeline('deploy:build:shared')) remove('deploy:build:shared')
     }

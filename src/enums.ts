@@ -1,6 +1,7 @@
 export const Strategy = {
-  BUILD: 'build',
-  DIRECT: 'direct',
+  LOCAL: 'local',
+  REMOTE: 'remote',
+  INLINE: 'inline',
 } as const
 export type Strategy = (typeof Strategy)[keyof typeof Strategy]
 

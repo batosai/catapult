@@ -49,8 +49,8 @@ export class TaskRunner {
   resolve(str: string): string {
     if (!this.#ctx) return str
     const p = this.#ctx.paths
-    const strategy = this.#ctx.config.strategy ?? Strategy.DIRECT
-    const buildPath = strategy === Strategy.BUILD ? p.builder : p.release
+    const strategy = this.#ctx.config.strategy ?? Strategy.INLINE
+    const buildPath = strategy === Strategy.REMOTE ? p.builder : p.release
     return str
       .replace(/\{\{release_path\}\}/g, p.release)
       .replace(/\{\{builder_path\}\}/g, buildPath)

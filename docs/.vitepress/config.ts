@@ -60,6 +60,7 @@ export default defineConfig({
                 { text: 'pm2', link: '/guide/recipes/pm2' },
               ],
             },
+            { text: 'Deployment Modes', link: '/guide/deployment-modes' },
             { text: 'Creating a Recipe', link: '/guide/creating-recipes' },
             { text: 'Hooks', link: '/guide/hooks' },
             { text: 'API Reference', link: '/guide/api' },

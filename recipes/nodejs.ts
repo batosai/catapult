@@ -25,7 +25,7 @@ declare module '../src/types.ts' {
 
 desc('Installs dependencies with frozen lockfile')
 task('nodejs:install', ({ config }: TaskContext) => {
-  if (config.strategy === Strategy.BUILD) {
+  if (config.strategy === Strategy.REMOTE) {
     cd('{{builder_path}}')
   } else {
     cd('{{release_path}}')
@@ -42,7 +42,7 @@ task('nodejs:install:production', () => {
 
 desc('Builds the application')
 task('nodejs:build', ({ config }: TaskContext) => {
-  if (config.strategy === Strategy.BUILD) {
+  if (config.strategy === Strategy.REMOTE) {
     cd('{{builder_path}}')
   } else {
     cd('{{release_path}}')
@@ -52,7 +52,7 @@ task('nodejs:build', ({ config }: TaskContext) => {
 
 desc('Runs the test suite')
 task('nodejs:test', ({ config }: TaskContext) => {
-  if (config.strategy === Strategy.BUILD) {
+  if (config.strategy === Strategy.REMOTE) {
     cd('{{builder_path}}')
   } else {
     cd('{{release_path}}')
@@ -66,3 +66,14 @@ after('deploy:build:shared', 'nodejs:build')
 if (inPipeline('deploy:build:copy')) {
   after('deploy:build:copy', 'nodejs:install:production')
 }
+
+// TODO
+// comment faire nodejs/bun iso.
+// deploy:build:??? à renommer ?
+// nodejs:install:production doit toujours etre la ?
+// Nodejs et bun doivent disparaitre pour laisser
+// chaque framework avoir sa recipe
+// Si besoin de générique, task custom.
+// Commencer avec adonisjs/ace, directus et astro
+// ou mettre des task par default deploy:install deploy:build ?
+// espress, fastify

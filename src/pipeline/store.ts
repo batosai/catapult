@@ -1,19 +1,7 @@
 import type { TaskName } from '../types.ts'
 
 export class PipelineStore {
-  #pipeline: string[] = [
-    'deploy:lock',
-    'deploy:release',
-    'deploy:update_code',
-    'deploy:build:shared',
-    'deploy:build:copy',
-    'deploy:shared',
-    'deploy:publish',
-    'deploy:log_revision',
-    'deploy:healthcheck',
-    'deploy:unlock',
-    'deploy:cleanup',
-  ]
+  #pipeline: string[] = []
 
   get(): string[] {
     return [...this.#pipeline]

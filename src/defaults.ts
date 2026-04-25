@@ -1,7 +1,7 @@
 import { $ } from 'execa'
 import { q, ssh, sleep } from './utils.ts'
-import { type TaskContext, task, desc, run, isVerbose } from './task.ts'
-import { Verbose } from './enums.ts'
+import { type TaskContext, task, desc, run, upload, isVerbose } from './task.ts'
+import { Strategy, Verbose } from './enums.ts'
 import { get } from './store.ts'
 
 declare module './types.ts' {
@@ -61,8 +61,14 @@ task('deploy:release', () => {
   run('mkdir -p {{release_path}}')
 })
 
-desc('Transfers code to the release directory (overridden by recipe)')
-task('deploy:update_code', async () => {})
+desc(
+  'Uploads local artifacts to the release directory (Strategy.LOCAL), or no-op when overridden by a recipe'
+)
+task('deploy:update_code', async ({ config, paths }: TaskContext) => {
+  if (config.strategy !== Strategy.LOCAL) return
+  const source = get('source_path', './build')
+  await upload(source, paths.release)
+})
 
 desc('Symlinks shared directories and files into the release')
 task('deploy:shared', () => {

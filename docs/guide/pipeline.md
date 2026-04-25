@@ -30,9 +30,73 @@ deploy:lock → deploy:release → deploy:update_code → deploy:build:shared �
 | `deploy:unlock`       | Removes the lock file (also called on failure)                     |
 | `deploy:cleanup`      | Removes old releases                                               |
 
-`deploy:build:shared` and `deploy:build:copy` are automatically removed from the pipeline when `strategy` is not `Strategy.BUILD`.
+`deploy:build:shared` and `deploy:build:copy` are automatically removed from the pipeline when `strategy` is not `Strategy.REMOTE`.
 
 `deploy:healthcheck` is automatically removed from the pipeline if no host defines a `healthcheck`.
+
+## Strategies
+
+The `strategy` option controls where the install and build steps run. It is set in `defineConfig`:
+
+```typescript
+import { Strategy } from '@catapultjs/deploy/enums'
+
+export default defineConfig({
+  strategy: Strategy.LOCAL, // default
+})
+```
+
+### `Strategy.INLINE`
+
+Everything happens directly in the release directory on the server. There is no intermediate build step.
+
+```
+deploy:update_code   → code cloned into releases/<release>
+deploy:shared        → shared dirs/files symlinked into the release
+[install & build]    → runs inside the release directory
+deploy:publish       → current → releases/<release>
+```
+
+Use this when your application can be installed and run directly on the server without a separate build step (e.g. a Node.js app without a frontend build, or one that builds on the fly).
+
+### `Strategy.REMOTE`
+
+The build runs on the server in a dedicated cache directory (`.catapult/builder`), then the output is copied into the release. This keeps the release clean and avoids installing dev dependencies in production.
+
+```
+deploy:update_code    → code cloned into .catapult/builder
+deploy:build:shared   → shared dirs/files symlinked into the builder
+[install & build]     → runs inside .catapult/builder
+deploy:build:copy     → build output copied into releases/<release>
+deploy:shared         → shared dirs/files symlinked into the release
+[install:production]  → production-only deps installed in the release
+deploy:publish        → current → releases/<release>
+```
+
+Use this when you want to build on the server but keep dev dependencies out of the release (e.g. TypeScript compilation, frontend bundling).
+
+### `Strategy.LOCAL` _(default)_
+
+The build runs on the local machine, and the output is uploaded to the release directory via SCP using `upload()`. The server receives only the built artifacts — no compiler, no dev dependencies on the server.
+
+```
+[install & build]    → runs locally
+deploy:update_code   → built output uploaded via SCP into releases/<release>
+deploy:shared        → shared dirs/files symlinked into the release
+deploy:publish       → current → releases/<release>
+```
+
+The source directory to upload is configured via the `source_path` store key (default: `./build`):
+
+```typescript
+import { set } from '@catapultjs/deploy'
+
+set('source_path', './dist')
+```
+
+Use this when your build environment requires tools or credentials not available on the server, or when you want to keep the server as lean as possible.
+
+For a complete view of each strategy's pipeline with all tasks in order, see [Deployment Modes](/guide/deployment-modes).
 
 ## Adding a task
 
