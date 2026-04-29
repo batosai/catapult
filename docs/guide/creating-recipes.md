@@ -68,6 +68,33 @@ onSetup(async (ctx, host, logger) => {
 })
 ```
 
+## Config hook
+
+Use `onConfig()` to insert tasks into the pipeline based on the active strategy. The callback runs synchronously inside `defineConfig()`, after the pipeline has been adjusted for the strategy — so `inPipeline()` reflects the final pipeline state.
+
+```typescript
+import { task, cd, run, after, onConfig } from '@catapultjs/deploy'
+import { Strategy } from '@catapultjs/deploy/enums'
+
+task('my-recipe:install', () => {
+  cd('{{builder_path}}')
+  run('npm ci')
+})
+
+task('my-recipe:install:production', () => {
+  cd('{{release_path}}')
+  run('npm install --omit=dev')
+})
+
+after('deploy:update_code', 'my-recipe:install')
+
+onConfig((config) => {
+  if (config.strategy === Strategy.REMOTE) {
+    after('deploy:builder:release', 'my-recipe:install:production')
+  }
+})
+```
+
 ## Status hook
 
 Use `onStatus()` to display additional information during `cata status` (e.g. process manager version, queue state):

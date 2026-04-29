@@ -1,6 +1,8 @@
 import { $ } from 'execa'
 import { q, ssh, sleep } from './utils.ts'
-import { type TaskContext, task, desc, run, upload, isVerbose } from './task.ts'
+import { type TaskContext, task, desc, cd, run, upload, isVerbose } from './task.ts'
+import { pm, pmInstall } from './package_manager.ts'
+import { initPipeline as setPipeline } from './pipeline.ts'
 import { Strategy, Verbose } from './enums.ts'
 import { get } from './store.ts'
 
@@ -9,13 +11,15 @@ declare module './types.ts' {
     'deploy:lock': true
     'deploy:release': true
     'deploy:update_code': true
-    'deploy:build:copy': true
+    'deploy:builder:release': true
     'deploy:shared': true
     'deploy:publish': true
     'deploy:log_revision': true
     'deploy:healthcheck': true
     'deploy:unlock': true
     'deploy:cleanup': true
+    'deploy:install': true
+    'deploy:build': true
   }
 }
 
@@ -66,7 +70,7 @@ desc(
 )
 task('deploy:update_code', async ({ config, paths }: TaskContext) => {
   if (config.strategy !== Strategy.LOCAL) return
-  const source = get('source_path', './build')
+  const source = get('source_path', './build/.')
   await upload(source, paths.release)
 })
 
@@ -89,7 +93,7 @@ task('deploy:shared', () => {
 })
 
 desc('Symlinks shared directories and files into the build')
-task('deploy:build:shared', () => {
+task('deploy:builder:shared', () => {
   const dirs: string[] = get('shared_dirs', [])
   const files: string[] = get('shared_files', [])
 
@@ -107,9 +111,9 @@ task('deploy:build:shared', () => {
 })
 
 desc('Copies build output from build directory to the release')
-task('deploy:build:copy', () => {
+task('deploy:builder:release', () => {
   const output: string = get('build_output', 'build')
-  run(`cp -r {{builder_path}}/${output}/. {{release_path}}/`)
+  run(`cp -r --link {{builder_path}}/${output}/. {{release_path}}/`)
 })
 
 desc('Switches current symlink to the new release')
@@ -201,3 +205,29 @@ task('deploy:cleanup', async ({ config, host, paths }: TaskContext) => {
   `
   )
 })
+
+desc('Installs dependencies in the builder — not inserted by default, add manually or override')
+task('deploy:install', () => {
+  cd('{{builder_path}}')
+  run(pmInstall())
+})
+
+desc('Builds the application in the builder — not inserted by default, add manually or override')
+task('deploy:build', () => {
+  cd('{{builder_path}}')
+  run(`${pm()} run build`)
+})
+
+setPipeline([
+  'deploy:lock',
+  'deploy:release',
+  'deploy:update_code',
+  'deploy:builder:shared',
+  'deploy:builder:release',
+  'deploy:shared',
+  'deploy:publish',
+  'deploy:log_revision',
+  'deploy:healthcheck',
+  'deploy:unlock',
+  'deploy:cleanup',
+])

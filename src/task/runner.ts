@@ -49,7 +49,7 @@ export class TaskRunner {
   resolve(str: string): string {
     if (!this.#ctx) return str
     const p = this.#ctx.paths
-    const strategy = this.#ctx.config.strategy ?? Strategy.INLINE
+    const strategy = this.#ctx.config.strategy ?? Strategy.LOCAL
     const buildPath = strategy === Strategy.REMOTE ? p.builder : p.release
     return str
       .replace(/\{\{release_path\}\}/g, p.release)
@@ -80,6 +80,10 @@ export class TaskRunner {
       ? expanded
       : posix.join(this.#ctx.host.deployPath, expanded)
     const target = `${scpTarget(this.#ctx.host)}:${resolved}`
+
+    const verbose = this.#ctx.config.verbose ?? Verbose.SILENT
+    if (verbose >= Verbose.TRACE) logger.cmd(`scp ${localPath} ${target}`)
+
     await $`scp ${args} ${localPath} ${target}`
   }
 
@@ -92,6 +96,10 @@ export class TaskRunner {
       ? expanded
       : posix.join(this.#ctx.host.deployPath, expanded)
     const source = `${scpTarget(this.#ctx.host)}:${resolved}`
+
+    const verbose = this.#ctx.config.verbose ?? Verbose.SILENT
+    if (verbose >= Verbose.TRACE) logger.cmd(`scp ${source} ${localPath}`)
+
     await $`scp ${args} ${source} ${localPath}`
   }
 

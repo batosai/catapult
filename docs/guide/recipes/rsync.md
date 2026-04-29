@@ -20,7 +20,6 @@ The destination depends on the active strategy:
 
 | Strategy | Destination |
 | --- | --- |
-| `Strategy.INLINE` | `releases/<release>` — source is transferred directly into the release |
 | `Strategy.REMOTE` | `.catapult/builder` — source is transferred into the build cache, then copied to the release after build |
 | `Strategy.LOCAL` | `releases/<release>` — set `rsync_source_path` to your build output directory (e.g. `./dist`); the server receives only built artifacts |
 
@@ -30,15 +29,6 @@ The destination depends on the active strategy:
 | ------------------- | ---------- | ------- | ------------------------------ |
 | `rsync_source_path` | `string`   | `./`    | Local source directory         |
 | `rsync_excludes`    | `string[]` | `[]`    | Patterns passed to `--exclude` |
-
-**`Strategy.INLINE`** — transfer source, build on the server in the release directory:
-
-```typescript
-import { set } from '@catapultjs/deploy'
-import '@catapultjs/deploy/recipes/rsync'
-
-set('rsync_excludes', ['.git', 'node_modules', '.env'])
-```
 
 **`Strategy.REMOTE`** — transfer source into the builder cache, build there, copy output to the release:
 

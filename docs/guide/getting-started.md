@@ -22,54 +22,6 @@ This creates a `deploy.(js|ts)` configuration file and installs `@catapultjs/dep
 npx cata deploy
 ```
 
-## Configuration
-
-Edit the generated `deploy.ts` file, or create it manually:
-
-```typescript
-import { defineConfig } from '@catapultjs/deploy'
-import { Verbose } from '@catapultjs/deploy/enums'
-import '@catapultjs/deploy/recipes/git'
-import '@catapultjs/deploy/recipes/adonisjs'
-import '@catapultjs/deploy/recipes/pm2'
-
-export default defineConfig({
-  keepReleases: 5,
-
-  repository: 'git@github.com:user/myapp.git', // optional, auto-detected from origin
-
-  hosts: [
-    {
-      name: 'staging',
-      ssh: 'deploy@staging.example.com',
-      deployPath: '/home/deploy/staging/myapp',
-      branch: {
-        name: 'develop',
-        ask: true,
-      },
-      healthcheck: {
-        url: 'http://127.0.0.1:3333/health',
-        retries: 10,
-        delayMs: 3000,
-      },
-    },
-    {
-      name: 'production',
-      ssh: 'deploy@prod.example.com',
-      deployPath: '/home/deploy/prod/myapp',
-      branch: 'main',
-      healthcheck: {
-        url: 'http://127.0.0.1:3333/health',
-        retries: 10,
-        delayMs: 3000,
-      },
-    },
-  ],
-
-  verbose: Verbose.NORMAL, // Verbose.SILENT | Verbose.NORMAL | Verbose.TRACE | Verbose.DEBUG
-})
-```
-
 ## Commands
 
 ```bash
@@ -105,11 +57,11 @@ npx cata list:releases
 # List the last 10 revisions (branch, commit, author, date)
 npx cata list:revisions
 
-# Show the current deployment pipeline
-npx cata pipeline
-
 # List registered tasks
 npx cata list:tasks
+
+# Show the current deployment pipeline
+npx cata pipeline
 
 # Run a specific task on servers
 npx cata task <task-name>
@@ -131,6 +83,57 @@ npx cata deploy -H staging
 # Override the branch to deploy
 npx cata deploy --branch feature/my-feature
 npx cata deploy -b feature/my-feature
+
+# Use an alternative config file
+npx cata deploy --config deploy.production.ts
+npx cata deploy -c deploy.staging.ts
+```
+
+## Configuration
+
+Edit the generated `deploy.ts` file, or create it manually:
+
+```typescript
+import { defineConfig } from '@catapultjs/deploy'
+import { Strategy, Verbose } from '@catapultjs/deploy/enums'
+import '@catapultjs/deploy/recipes/git'
+import '@catapultjs/deploy/recipes/adonisjs'
+import '@catapultjs/deploy/recipes/pm2'
+
+export default defineConfig({
+  keepReleases: 5, // optional, default: 5
+
+  repository: 'git@github.com:user/myapp.git', // optional, auto-detected from origin
+
+  strategy: Strategy.LOCAL, // Strategy.LOCAL (default) | Strategy.REMOTE
+
+  packageManager: 'pnpm', // auto-detected from lock files if not set
+
+  hosts: [
+    {
+      name: 'production',
+      ssh: 'deploy@prod.example.com',
+      deployPath: '/home/deploy/prod/myapp',
+      branch: 'main',  // required by git recipe
+      healthcheck: {   // optional
+        url: 'http://127.0.0.1:3333/health',
+        retries: 10,
+        delayMs: 3000,
+      },
+    },
+    {
+      name: 'staging',
+      ssh: 'deploy@staging.example.com',
+      deployPath: '/home/deploy/staging/myapp',
+      branch: {         // required by git recipe
+        name: 'develop',
+        ask: true,
+      },
+    },
+  ],
+
+  verbose: Verbose.NORMAL, // Verbose.SILENT | Verbose.NORMAL | Verbose.TRACE | Verbose.DEBUG
+})
 ```
 
 ## Server structure
@@ -144,10 +147,9 @@ After `cata deploy:setup`, the server will have the following structure:
     2024-01-15T.../ ← active release
     2024-01-14T.../
   shared/
-    .env            (AdonisJS recipe)
-    storage/        (AdonisJS recipe)
-    logs/           (AdonisJS recipe)
-    tmp/            (AdonisJS recipe)
+    .env
+    logs/
+    ...
   .catapult/
     repo/           ← bare git mirror (git recipe)
     builder/        ← build workspace (Strategy.REMOTE)
@@ -173,6 +175,17 @@ npx cata deploy -H staging
 ```
 
 The `--host` / `-H` flag is available on all commands: `deploy`, `deploy:setup`, `rollback`, `status`, `list:releases`, `task`.
+
+## Config file
+
+By default, Catapult looks for `deploy.ts` or `deploy.js` in the current directory. Use `--config` / `-c` to point to a different file:
+
+```bash
+npx cata deploy --config deploy.production.ts
+npx cata deploy -c deploy.staging.ts
+```
+
+The `--config` flag is available on all commands.
 
 ## Rollback
 

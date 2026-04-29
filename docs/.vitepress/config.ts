@@ -54,14 +54,18 @@ export default defineConfig({
               items: [
                 { text: 'git', link: '/guide/recipes/git' },
                 { text: 'rsync', link: '/guide/recipes/rsync' },
-                { text: 'nodejs', link: '/guide/recipes/nodejs' },
-                { text: 'bun', link: '/guide/recipes/bun' },
                 { text: 'adonisjs', link: '/guide/recipes/adonisjs' },
                 { text: 'pm2', link: '/guide/recipes/pm2' },
               ],
             },
             { text: 'Deployment Modes', link: '/guide/deployment-modes' },
-            { text: 'Creating a Recipe', link: '/guide/creating-recipes' },
+            {
+              text: 'Creating a Recipe',
+              link: '/guide/creating-recipes',
+              items: [
+                { text: 'Monorepo', link: '/guide/monorepo' },
+              ],
+            },
             { text: 'Hooks', link: '/guide/hooks' },
             { text: 'API Reference', link: '/guide/api' },
             { text: 'Changelog', link: '/guide/changelog' },

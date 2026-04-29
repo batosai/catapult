@@ -363,8 +363,8 @@ remove('deploy:log_revision')
 Returns `true` if the task is present in the current pipeline.
 
 ```typescript
-if (inPipeline('deploy:build:copy')) {
-  after('deploy:build:copy', 'my:task')
+if (inPipeline('deploy:builder:release')) {
+  after('deploy:builder:release', 'my:task')
 } else {
   after('deploy:shared', 'my:task')
 }
@@ -405,6 +405,25 @@ onStatus(async (_ctx, host, logger) => {
 
 ---
 
+### `onConfig(fn)`
+
+Registers a callback that runs synchronously inside `defineConfig()`, after the pipeline has been adjusted for the active strategy. Use it to insert tasks conditionally based on the strategy or pipeline state.
+
+The callback receives the resolved `Config` as its argument.
+
+```typescript
+import { onConfig, after } from '@catapultjs/deploy'
+import { Strategy } from '@catapultjs/deploy/enums'
+
+onConfig((config) => {
+  if (config.strategy === Strategy.REMOTE) {
+    after('deploy:builder:release', 'my-recipe:install:production')
+  }
+})
+```
+
+---
+
 ## Store
 
 Key/value store for sharing configuration between `deploy.ts` and recipes.
@@ -413,10 +432,10 @@ Key/value store for sharing configuration between `deploy.ts` and recipes.
 
 | Key             | Type       | Default   | Used by                                                                              |
 | --------------- | ---------- | --------- | ------------------------------------------------------------------------------------ |
-| `shared_dirs`   | `string[]` | `[]`      | `deploy:shared`, `deploy:build:shared`                                               |
-| `shared_files`  | `string[]` | `[]`      | `deploy:shared`, `deploy:build:shared`                                               |
+| `shared_dirs`   | `string[]` | `[]`      | `deploy:shared`, `deploy:builder:shared`                                               |
+| `shared_files`  | `string[]` | `[]`      | `deploy:shared`, `deploy:builder:shared`                                               |
 | `writable_dirs` | `string[]` | `[]`      | `deploy:setup` (via `onSetup`)                                                       |
-| `build_output`  | `string`   | `'build'` | `deploy:build:copy` — subdirectory to copy from the build directory into the release |
+| `build_output`  | `string`   | `'build'` | `deploy:builder:release` — subdirectory to copy from the build directory into the release |
 
 ### `set(key, value)`
 
@@ -477,6 +496,7 @@ Returns the install command with frozen lockfile for the current package manager
 | `npm`            | `npm ci`                         |
 | `pnpm`           | `pnpm install --frozen-lockfile` |
 | `yarn`           | `yarn install --frozen-lockfile` |
+| `bun`            | `bun ci`                         |
 
 ```typescript
 run(pmInstall())
@@ -488,11 +508,12 @@ run(pmInstall())
 
 Returns the production-only install command for the current package manager.
 
-| `packageManager` | Command                     |
-| ---------------- | --------------------------- |
-| `npm`            | `npm install --omit=dev`    |
-| `pnpm`           | `pnpm install --prod`       |
-| `yarn`           | `yarn install --production` |
+| `packageManager` | Command                                       |
+| ---------------- | --------------------------------------------- |
+| `npm`            | `npm ci --omit=dev`                           |
+| `pnpm`           | `pnpm install --frozen-lockfile --prod`       |
+| `yarn`           | `yarn install --frozen-lockfile --production` |
+| `bun`            | `bun ci --omit=dev`                           |
 
 ```typescript
 run(pmInstallProd())
@@ -511,7 +532,7 @@ Available in `cd()` and `run()`:
 | `{{current_path}}` | `/base/current` |
 | `{{shared_path}}` | `/base/shared` |
 | `{{releases_path}}` | `/base/releases` |
-| `{{builder_path}}` | `/base/.catapult/builder` |
+| `{{builder_path}}` | `/base/.catapult/builder` when `Strategy.REMOTE`, otherwise `/base/releases/<release>` |
 | `{{base_path}}` | `/base` |
 | `{{release}}` | Release name (e.g. `2024-01-15T10-30-00-000Z`) |
 :::

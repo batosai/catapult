@@ -1,5 +1,5 @@
 ---
-description: Drop-in Catapult recipes for Node.js, Bun, AdonisJS, PM2, git and rsync.
+description: Drop-in Catapult recipes for AdonisJS, PM2, git and rsync.
 ---
 
 # Recipes
@@ -14,7 +14,5 @@ Recipes are importable modules that register tasks and insert them into the pipe
 | ---------------------- | --------------------------------------- |
 | [git](./git)           | Clone the repository and log revisions  |
 | [rsync](./rsync)       | Transfer files via rsync                |
-| [nodejs](./nodejs)     | Install dependencies and build          |
-| [bun](./bun)           | Install dependencies and build with Bun |
 | [adonisjs](./adonisjs) | AdonisJS-specific deployment steps      |
 | [pm2](./pm2)           | Process management with PM2             |

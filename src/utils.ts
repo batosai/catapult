@@ -17,6 +17,16 @@ const PM_LOCK_FILES: [string, PackageManager][] = [
   ['package-lock.json', PackageManager.NPM],
 ]
 
+export async function getLockFileName(cwd = process.cwd()): Promise<string | false> {
+  for (const [lockFile] of PM_LOCK_FILES) {
+    try {
+      await access(resolve(cwd, lockFile))
+      return lockFile
+    } catch {}
+  }
+  return false
+}
+
 /** Detects the package manager by checking for lock files in the given directory. */
 export async function detectPackageManager(cwd = process.cwd()): Promise<PackageManager> {
   for (const [lockFile, manager] of PM_LOCK_FILES) {

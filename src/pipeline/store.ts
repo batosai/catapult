@@ -2,13 +2,23 @@ import type { TaskName } from '../types.ts'
 
 export class PipelineStore {
   #pipeline: string[] = []
+  #locked = false
 
   get(): string[] {
     return [...this.#pipeline]
   }
 
+  init(tasks: TaskName[]): void {
+    this.#pipeline = [...tasks]
+  }
+
   set(tasks: TaskName[]): void {
     this.#pipeline = [...tasks]
+    this.#locked = true
+  }
+
+  isLocked(): boolean {
+    return this.#locked
   }
 
   before(existing: TaskName, newTask: TaskName): void {

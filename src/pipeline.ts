@@ -1,8 +1,10 @@
 import type { TaskName } from './types.ts'
 import { PipelineStore } from './pipeline/store.ts'
-import { hooks, type LifecycleHook } from './pipeline/hooks.ts'
+import { hooks, type LifecycleHook, type ConfigHook } from './pipeline/hooks.ts'
 
-export type { LifecycleHook } from './pipeline/hooks.ts'
+export { hooks }
+
+export type { LifecycleHook, ConfigHook } from './pipeline/hooks.ts'
 
 const pipeline = new PipelineStore()
 
@@ -11,9 +13,19 @@ export function getPipeline(): string[] {
   return pipeline.get()
 }
 
-/** Replaces the entire pipeline. */
+/** Replaces the entire pipeline. Marks it as user-managed — onConfig hooks will not run. */
 export function setPipeline(tasks: TaskName[]): void {
   pipeline.set(tasks)
+}
+
+/** @internal — initialises the default pipeline without marking it as user-managed. */
+export function initPipeline(tasks: TaskName[]): void {
+  pipeline.init(tasks)
+}
+
+/** Returns true if the pipeline was explicitly set by the user via setPipeline(). */
+export function isPipelineLocked(): boolean {
+  return pipeline.isLocked()
 }
 
 /** Inserts a task before an existing one in the pipeline. */
@@ -44,4 +56,9 @@ export function onSetup(fn: LifecycleHook): void {
 /** Registers a function to run during the status command. */
 export function onStatus(fn: LifecycleHook): void {
   hooks.addStatus(fn)
+}
+
+/** Registers a function called synchronously inside defineConfig(), after the pipeline is adjusted for the active strategy. */
+export function onConfig(fn: ConfigHook): void {
+  hooks.addConfig(fn)
 }
