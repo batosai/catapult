@@ -7,9 +7,9 @@ import { rsyncSshFlag, resolveSshArgs } from '../src/utils.ts'
 desc('Transfers files to the release or builder directory via rsync')
 task('deploy:update_code', async ({ host, paths, config, logger }: TaskContext) => {
   const [target] = resolveSshArgs(host)
-  const source = get('rsync_source_path', './')
+  const source = get('rsync_source_path', get('source_path', './')).replace(/\/?$/, '/')
   const dest = config.strategy === Strategy.REMOTE ? paths.builder : paths.release
-  const args: string[] = ['-az', '-e', rsyncSshFlag(host)]
+  const args: string[] = ['-az', '--delete', '-e', rsyncSshFlag(host)]
   for (const pattern of get<string[]>('rsync_excludes', [])) {
     args.push(`--exclude=${pattern}`)
   }

@@ -12,9 +12,9 @@ import '@catapultjs/deploy/recipes/rsync'
 
 **Tasks**
 
-| Task                 | Inserted | Description                                             |
-| -------------------- | -------- | ------------------------------------------------------- |
-| `deploy:update_code` | —        | Overrides the built-in task to transfer files via rsync |
+| Task                 | Inserted                                            | Description                                                                             |
+| -------------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `deploy:update_code` | —                                                   | Overrides the built-in task to transfer files via rsync                                 |
 
 The destination depends on the active strategy:
 
@@ -25,10 +25,10 @@ The destination depends on the active strategy:
 
 **Configuration**
 
-| Key                 | Type       | Default | Description                    |
-| ------------------- | ---------- | ------- | ------------------------------ |
-| `rsync_source_path` | `string`   | `./`    | Local source directory         |
-| `rsync_excludes`    | `string[]` | `[]`    | Patterns passed to `--exclude` |
+| Key                 | Type       | Default | Description                                                                                                              |
+| ------------------- | ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `rsync_source_path` | `string`   | `./`    | Local source directory — trailing slash is added automatically so only the contents are transferred, not the directory itself |
+| `rsync_excludes`    | `string[]` | `[]`    | Patterns passed to `--exclude`                                                                                           |
 
 **`Strategy.REMOTE`** — transfer source into the builder cache, build there, copy output to the release:
 

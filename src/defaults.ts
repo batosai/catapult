@@ -70,7 +70,7 @@ desc(
 )
 task('deploy:update_code', async ({ config, paths }: TaskContext) => {
   if (config.strategy !== Strategy.LOCAL) return
-  const source = get('source_path', './build/.')
+  const source = get('source_path', './build').replace(/\/?$/, '/')
   await upload(source, paths.release)
 })
 
