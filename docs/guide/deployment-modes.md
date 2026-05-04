@@ -33,9 +33,9 @@ export default defineConfig({
 
 ```
 deploy:lock
-deploy:release
 adonisjs:test        → runs locally (node ace test)
 adonisjs:build       → runs locally (node ace build)
+deploy:release
 deploy:update_code   → upload(source_path, paths.release) via SCP
 deploy:shared        → symlinks shared dirs/files into the release
 adonisjs:install     → production deps installed in the release
@@ -77,12 +77,12 @@ export default defineConfig({
 
 ```
 deploy:lock
-deploy:release
 adonisjs:test        → runs locally (node ace test)
 adonisjs:build       → runs locally (node ace build)
+deploy:release
 deploy:update_code   → rsync rsync_source_path/ → releases/<release>/
-deploy:shared        → symlinks shared dirs/files into the release
 adonisjs:install     → production deps installed in the release
+deploy:shared        → symlinks shared dirs/files into the release
 adonisjs:migrate     → node ace migration:run --force
 deploy:publish       → current → releases/<release>
 pm2:startOrReload    → pm2 startOrReload ecosystem.config.cjs --update-env
@@ -120,23 +120,23 @@ export default defineConfig({
 ```
 deploy:lock
 git:check                 → verifies branch exists on remote
-deploy:release
 git:update                → clones/fetches bare mirror into .catapult/repo
 deploy:update_code        → clones from .catapult/repo into .catapult/builder
 adonisjs:builder:install  → full deps installed in the builder
-adonisjs:builder:test     → node ace test (runs in builder)
 deploy:builder:shared     → symlinks shared dirs/files into .catapult/builder
+adonisjs:builder:test     → node ace test (runs in builder)
 adonisjs:builder:build    → node ace build (runs in builder)
+deploy:release
 deploy:builder:release    → copies build output from builder into releases/<release>
-deploy:shared             → symlinks shared dirs/files into the release
 adonisjs:install          → production deps installed in the release
+deploy:shared             → symlinks shared dirs/files into the release
 adonisjs:migrate          → node ace migration:run --force
 deploy:publish            → current → releases/<release>
 pm2:startOrReload         → pm2 startOrReload ecosystem.config.cjs --update-env
 pm2:save                  → pm2 save
 deploy:log_revision
 deploy:unlock
-deploy:cleanup
+deploy:cleanup 
 ```
 
 ---
@@ -167,15 +167,15 @@ export default defineConfig({
 
 ```
 deploy:lock
-deploy:release
 deploy:update_code        → rsync rsync_source_path/ → .catapult/builder/
 adonisjs:builder:install  → full deps installed in the builder
-adonisjs:builder:test     → node ace test (runs in builder)
 deploy:builder:shared     → symlinks shared dirs/files into .catapult/builder
+adonisjs:builder:test     → node ace test (runs in builder)
 adonisjs:builder:build    → node ace build (runs in builder)
+deploy:release
 deploy:builder:release    → copies build output from builder into releases/<release>
-deploy:shared             → symlinks shared dirs/files into the release
 adonisjs:install          → production deps installed in the release
+deploy:shared             → symlinks shared dirs/files into the release
 adonisjs:migrate          → node ace migration:run --force
 deploy:publish            → current → releases/<release>
 pm2:startOrReload         → pm2 startOrReload ecosystem.config.cjs --update-env

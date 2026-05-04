@@ -5,7 +5,6 @@ import { detectPackageManager } from './utils.ts'
 import {
   remove,
   getPipeline,
-  inPipeline,
   isPipelineLocked,
   hooks,
   setImmediatePipeline,
@@ -23,12 +22,6 @@ export function defineConfig(config: Config): () => Promise<void> {
   const resolved: Config = { ...initialConfigValues, ...config }
 
   setImmediatePipeline(true)
-
-  const strategy = resolved.strategy!
-  if (strategy !== Strategy.REMOTE) {
-    if (inPipeline('deploy:builder:release')) remove('deploy:builder:release')
-    if (inPipeline('deploy:builder:shared')) remove('deploy:builder:shared')
-  }
 
   if (!isPipelineLocked()) hooks.runConfig(resolved)
 

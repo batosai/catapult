@@ -2,7 +2,7 @@ import { $ } from 'execa'
 import { q, ssh, sleep } from './utils.ts'
 import { type TaskContext, task, desc, cd, run, upload, isVerbose } from './task.ts'
 import { pm, pmInstall } from './package_manager.ts'
-import { initPipeline as setPipeline } from './pipeline.ts'
+import { initPipeline as setPipeline, onConfig } from './pipeline.ts'
 import { Strategy, Verbose } from './enums.ts'
 import { get } from './store.ts'
 
@@ -218,16 +218,32 @@ task('deploy:build', () => {
   run(`${pm()} run build`)
 })
 
-setPipeline([
-  'deploy:lock',
-  'deploy:release',
-  'deploy:update_code',
-  'deploy:builder:shared',
-  'deploy:builder:release',
-  'deploy:shared',
-  'deploy:publish',
-  'deploy:log_revision',
-  'deploy:healthcheck',
-  'deploy:unlock',
-  'deploy:cleanup',
-])
+onConfig((config) => {
+  if (config.strategy === Strategy.REMOTE) {
+    setPipeline([
+      'deploy:lock',
+      'deploy:update_code',
+      'deploy:builder:shared',
+      'deploy:release',
+      'deploy:builder:release',
+      'deploy:shared',
+      'deploy:publish',
+      'deploy:log_revision',
+      'deploy:healthcheck',
+      'deploy:unlock',
+      'deploy:cleanup',
+    ])
+  } else {
+    setPipeline([
+      'deploy:lock',
+      'deploy:release',
+      'deploy:update_code',
+      'deploy:shared',
+      'deploy:publish',
+      'deploy:log_revision',
+      'deploy:healthcheck',
+      'deploy:unlock',
+      'deploy:cleanup',
+    ])
+  }
+})

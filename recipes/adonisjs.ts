@@ -111,8 +111,8 @@ task('adonisjs:migrate', () => {
 onConfig((config) => {
   if (config.strategy === Strategy.REMOTE) {
     after('deploy:update_code', 'adonisjs:builder:install')
-    after('adonisjs:builder:install', 'adonisjs:builder:test')
-    after('deploy:builder:shared', 'adonisjs:builder:build')
+    after('deploy:builder:shared', 'adonisjs:builder:test')
+    after('adonisjs:builder:test', 'adonisjs:builder:build')
     after('deploy:builder:release', 'adonisjs:install')
   } else {
     before('deploy:release', 'adonisjs:build')
