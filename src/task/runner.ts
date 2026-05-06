@@ -1,5 +1,5 @@
 import type { Host, Config, Paths } from '../types.ts'
-import { Strategy, Verbose } from '../enums.ts'
+import { Verbose } from '../enums.ts'
 import { ssh, scpArgs, scpTarget } from '../utils.ts'
 import { $ } from 'execa'
 import { logger, type CatapultLogger } from '../logger.ts'
@@ -49,11 +49,8 @@ export class TaskRunner {
   resolve(str: string): string {
     if (!this.#ctx) return str
     const p = this.#ctx.paths
-    const strategy = this.#ctx.config.strategy ?? Strategy.LOCAL
-    const buildPath = strategy === Strategy.REMOTE ? p.builder : p.release
     return str
       .replace(/\{\{release_path\}\}/g, p.release)
-      .replace(/\{\{builder_path\}\}/g, buildPath)
       .replace(/\{\{current_path\}\}/g, p.current)
       .replace(/\{\{shared_path\}\}/g, p.shared)
       .replace(/\{\{releases_path\}\}/g, p.releases)

@@ -1,9 +1,3 @@
-export const Strategy = {
-  LOCAL: 'local',
-  REMOTE: 'remote',
-} as const
-export type Strategy = (typeof Strategy)[keyof typeof Strategy]
-
 export const PackageManager = {
   NPM: 'npm',
   PNPM: 'pnpm',

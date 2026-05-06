@@ -1,9 +1,9 @@
 import { $ } from 'execa'
 import { q, ssh, sleep } from './utils.ts'
-import { type TaskContext, task, desc, cd, run, upload, isVerbose } from './task.ts'
+import { type TaskContext, task, desc, cd, run, isVerbose } from './task.ts'
 import { pm, pmInstall } from './package_manager.ts'
-import { initPipeline as setPipeline, onConfig } from './pipeline.ts'
-import { Strategy, Verbose } from './enums.ts'
+import { initPipeline as setPipeline } from './pipeline.ts'
+import { Verbose } from './enums.ts'
 import { get } from './store.ts'
 
 declare module './types.ts' {
@@ -11,7 +11,6 @@ declare module './types.ts' {
     'deploy:lock': true
     'deploy:release': true
     'deploy:update_code': true
-    'deploy:builder:release': true
     'deploy:shared': true
     'deploy:publish': true
     'deploy:log_revision': true
@@ -20,6 +19,7 @@ declare module './types.ts' {
     'deploy:cleanup': true
     'deploy:install': true
     'deploy:build': true
+    'deploy:test': true
   }
 }
 
@@ -65,14 +65,8 @@ task('deploy:release', () => {
   run('mkdir -p {{release_path}}')
 })
 
-desc(
-  'Uploads local artifacts to the release directory (Strategy.LOCAL), or no-op when overridden by a recipe'
-)
-task('deploy:update_code', async ({ config, paths }: TaskContext) => {
-  if (config.strategy !== Strategy.LOCAL) return
-  const source = get('source_path', './build').replace(/\/?$/, '/')
-  await upload(source, paths.release)
-})
+desc('Method for updating code')
+task('deploy:update_code', () => {})
 
 desc('Symlinks shared directories and files into the release')
 task('deploy:shared', () => {
@@ -90,30 +84,6 @@ task('deploy:shared', () => {
     run(`rm -f {{release_path}}/${f}`)
     run(`ln -sfn {{shared_path}}/${f} {{release_path}}/${f}`)
   }
-})
-
-desc('Symlinks shared directories and files into the build')
-task('deploy:builder:shared', () => {
-  const dirs: string[] = get('shared_dirs', [])
-  const files: string[] = get('shared_files', [])
-
-  for (const dir of dirs) {
-    const d = dir.replace(/^\//, '')
-    run(`rm -rf {{builder_path}}/${d}`)
-    run(`ln -sfn {{shared_path}}/${d} {{builder_path}}/${d}`)
-  }
-
-  for (const file of files) {
-    const f = file.replace(/^\//, '')
-    run(`rm -f {{builder_path}}/${f}`)
-    run(`ln -sfn {{shared_path}}/${f} {{builder_path}}/${f}`)
-  }
-})
-
-desc('Copies build output from build directory to the release')
-task('deploy:builder:release', () => {
-  const output: string = get('build_output', 'build')
-  run(`cp -r --link {{builder_path}}/${output}/. {{release_path}}/`)
 })
 
 desc('Switches current symlink to the new release')
@@ -206,44 +176,32 @@ task('deploy:cleanup', async ({ config, host, paths }: TaskContext) => {
   )
 })
 
-desc('Installs dependencies in the builder — not inserted by default, add manually or override')
+desc('Installs dependencies in the release')
 task('deploy:install', () => {
-  cd('{{builder_path}}')
+  cd('{{release_path}}')
   run(pmInstall())
 })
 
-desc('Builds the application in the builder — not inserted by default, add manually or override')
+desc('Builds the application in the release')
 task('deploy:build', () => {
-  cd('{{builder_path}}')
+  cd('{{release_path}}')
   run(`${pm()} run build`)
 })
 
-onConfig((config) => {
-  if (config.strategy === Strategy.REMOTE) {
-    setPipeline([
-      'deploy:lock',
-      'deploy:update_code',
-      'deploy:builder:shared',
-      'deploy:release',
-      'deploy:builder:release',
-      'deploy:shared',
-      'deploy:publish',
-      'deploy:log_revision',
-      'deploy:healthcheck',
-      'deploy:unlock',
-      'deploy:cleanup',
-    ])
-  } else {
-    setPipeline([
-      'deploy:lock',
-      'deploy:release',
-      'deploy:update_code',
-      'deploy:shared',
-      'deploy:publish',
-      'deploy:log_revision',
-      'deploy:healthcheck',
-      'deploy:unlock',
-      'deploy:cleanup',
-    ])
-  }
+desc('Tests the application in the release')
+task('deploy:test', () => {
+  cd('{{release_path}}')
+  run(`${pm()} run test`)
 })
+
+setPipeline([
+  'deploy:lock',
+  'deploy:release',
+  'deploy:update_code',
+  'deploy:shared',
+  'deploy:publish',
+  'deploy:log_revision',
+  'deploy:healthcheck',
+  'deploy:unlock',
+  'deploy:cleanup',
+])

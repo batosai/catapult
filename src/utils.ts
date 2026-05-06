@@ -17,7 +17,7 @@ const PM_LOCK_FILES: [string, PackageManager][] = [
   ['package-lock.json', PackageManager.NPM],
 ]
 
-export async function getLockFileName(cwd = process.cwd()): Promise<string | false> {
+export async function getPackageLockFileName(cwd = process.cwd()): Promise<string | false> {
   for (const [lockFile] of PM_LOCK_FILES) {
     try {
       await access(resolve(cwd, lockFile))
@@ -63,7 +63,6 @@ export function getPaths(baseDir: string, releaseName: string): Paths {
     shared: `${baseDir}/shared`,
     cataConfig: `${baseDir}/.catapult`,
     repo: `${baseDir}/.catapult/repo`,
-    builder: `${baseDir}/.catapult/builder`,
     lock: `${baseDir}/.catapult/deploy.lock`,
   }
 }
@@ -90,6 +89,17 @@ export function scpArgs(host: Host): string[] {
 export function scpTarget(host: Host): string {
   if (typeof host.ssh === 'string') return host.ssh
   return `${host.ssh.user}@${host.ssh.host}`
+}
+
+export function resolveHostStringValue(value: unknown, host: Host, key: string): string {
+  if (typeof value === 'string') return value
+
+  if (value && typeof value === 'object' && !Array.isArray(value)) {
+    const resolved = (value as Record<string, unknown>)[host.name]
+    if (typeof resolved === 'string') return resolved
+  }
+
+  throw new Error(`[${host.name}] ${key} must be a string or an object keyed by host name`)
 }
 
 /** Returns the -e flag value for rsync, reusing the SSH multiplexing socket. */

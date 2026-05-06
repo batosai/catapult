@@ -6,16 +6,8 @@ description: Catapult changelog — release history and notable changes.
 
 ## 0.6.0
 
-- `Strategy.BUILD` renamed to `Strategy.REMOTE`, `Strategy.DIRECT` removed; added `Strategy.LOCAL` — default strategy changed to `Strategy.LOCAL`
-- `Strategy.LOCAL`: `deploy:update_code` uploads local artifacts to the release via SCP; source directory is configured via `set('source_path', './dist')` (default: `./build`)
-- `deploy:build:shared` renamed to `deploy:builder:shared`, `deploy:build:copy` renamed to `deploy:builder:release`
-- Added `onConfig(fn)` hook — callback runs synchronously inside `defineConfig()` after the pipeline is adjusted for the active strategy; use `inPipeline()` inside it to reliably check the final pipeline state
-::: v-pre
-- `{{builder_path}}` is now strategy-aware — resolves to `.catapult/builder` when `Strategy.REMOTE`, and to the release directory otherwise
-:::
+- `Strategy` removed
 - Added `--config` / `-c` global flag — points to an alternative deploy config file (default: `deploy.ts`)
-- `Strategy.REMOTE` + rsync: `deploy:update_code` now correctly targets `.catapult/builder` instead of the release directory
-- Added [Deployment Modes](/guide/deployment-modes) page — documents the complete pipeline for each strategy and transfer method combination
 
 > Released at *2026-04-26*
 

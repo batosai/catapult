@@ -1,4 +1,4 @@
-import type { Strategy, PackageManager, Verbose } from './enums.ts'
+import type { PackageManager, Verbose } from './enums.ts'
 
 export interface BranchWithPrompt {
   name: string
@@ -34,7 +34,6 @@ export interface Paths {
   shared: string
   cataConfig: string
   repo: string
-  builder: string
   lock: string
 }
 
@@ -56,7 +55,6 @@ export interface Hooks {
 export interface Config {
   keepReleases?: number
   repository?: string
-  strategy?: Strategy
 
   packageManager?: PackageManager
   hosts: Host[]
