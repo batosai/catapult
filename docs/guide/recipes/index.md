@@ -1,5 +1,5 @@
 ---
-description: Drop-in Catapult recipes for AdonisJS, PM2, git and rsync.
+description: Drop-in Catapult recipes for Astro, AdonisJS, PM2, git and rsync.
 ---
 
 # Recipes
@@ -10,9 +10,10 @@ description: Drop-in Catapult recipes for AdonisJS, PM2, git and rsync.
 
 Recipes are importable modules that register tasks and insert them into the pipeline automatically.
 
-| Recipe                 | Description                             |
-| ---------------------- | --------------------------------------- |
-| [git](./git)           | Clone the repository and log revisions  |
-| [rsync](./rsync)       | Transfer files via rsync                |
-| [adonisjs](./adonisjs) | AdonisJS-specific deployment steps      |
-| [pm2](./pm2)           | Process management with PM2             |
+| Recipe                 | Description |
+| ---------------------- | ----------- |
+| [astro](./astro)       | Build locally with Astro and upload artifacts |
+| [git](./git)           | Clone the repository and log revisions |
+| [rsync](./rsync)       | Transfer files via rsync |
+| [adonisjs](./adonisjs) | AdonisJS-specific deployment steps |
+| [pm2](./pm2)           | Process management with PM2 |

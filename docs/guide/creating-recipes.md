@@ -24,15 +24,15 @@ task('my-recipe:build', () => {
 after('deploy:update_code', 'my-recipe:build')
 ```
 
-The task function receives a `ctx` argument with the current `host`, `paths`, and `deployCtx`. Use it when you need to access host information or run raw SSH commands:
+The task function receives a `ctx` argument with the current `host`, `paths`, `config`, `release`, and `logger`. Use it when you need to access host information or run raw SSH commands:
 
 ```typescript
 import { task, after } from '@catapultjs/deploy'
 import { ssh, q } from '@catapultjs/deploy/utils'
 
-task('my-recipe:build', async ({ host, paths, deployCtx, logger }) => {
+task('my-recipe:build', async ({ host, paths, release, logger }) => {
   await ssh(host, `set -e\ncd ${q(paths.release)}\nnpm run build`)
-  logger.ok(host.name, 'build complete')
+  logger.step(host.name, `build complete for ${release}`)
 })
 
 after('deploy:update_code', 'my-recipe:build')
@@ -46,7 +46,7 @@ import './recipes/my-recipe'
 
 ## Setup hook
 
-Use `onSetup()` to run server-side initialization during `cata deploy:setup` (e.g. create shared directories):
+Use `onSetup()` to run server-side initialization during `cata deploy:setup`:
 
 ```typescript
 import { onSetup } from '@catapultjs/deploy'
@@ -68,36 +68,21 @@ onSetup(async (ctx, host, logger) => {
 })
 ```
 
-## Config hook
+## Overriding built-in tasks
 
-Use `onConfig()` to insert tasks into the pipeline based on the active strategy. The callback runs synchronously inside `defineConfig()`, after the pipeline has been adjusted for the strategy — so `inPipeline()` reflects the final pipeline state.
+Recipes can override built-in tasks by registering the same name. This is how official recipes such as `git`, `rsync`, `adonisjs`, and `astro` customize `deploy:update_code` or `deploy:build`.
 
 ```typescript
-import { task, cd, run, after, onConfig } from '@catapultjs/deploy'
-import { Strategy } from '@catapultjs/deploy/enums'
+import { task } from '@catapultjs/deploy'
 
-task('my-recipe:install', () => {
-  cd('{{builder_path}}')
-  run('npm ci')
-})
-
-task('my-recipe:install:production', () => {
-  cd('{{release_path}}')
-  run('npm install --omit=dev')
-})
-
-after('deploy:update_code', 'my-recipe:install')
-
-onConfig((config) => {
-  if (config.strategy === Strategy.REMOTE) {
-    after('deploy:builder:release', 'my-recipe:install:production')
-  }
+task('deploy:update_code', async ({ paths }) => {
+  console.log(`sync to ${paths.release}`)
 })
 ```
 
 ## Status hook
 
-Use `onStatus()` to display additional information during `cata status` (e.g. process manager version, queue state):
+Use `onStatus()` to display additional information during `cata status`:
 
 ```typescript
 import { onStatus } from '@catapultjs/deploy'
@@ -109,7 +94,7 @@ onStatus(async (_ctx, host, logger) => {
 })
 ```
 
-## Configuration: set() / get()
+## Configuration: `set()` / `get()`
 
 Expose configurable options via `set()` / `get()` so users can customize the recipe without modifying it:
 
@@ -131,7 +116,7 @@ import './recipes/my-recipe'
 set('my_recipe_excludes', ['.git', 'node_modules'])
 ```
 
-## Binaries: bin()
+## Binaries: `bin()`
 
 Use `bin()` to resolve binary paths. It checks the current host's `bin` config first, then falls back to the binary name:
 
@@ -141,18 +126,6 @@ import { task, cd, run, bin } from '@catapultjs/deploy'
 task('my-recipe:build', () => {
   cd('{{release_path}}')
   run(`${bin('node')} my-script.js`)
-})
-```
-
-`bin()` can also be called with the host from `ctx` for use outside of `cd()`/`run()`:
-
-```typescript
-import { task } from '@catapultjs/deploy'
-import { ssh } from '@catapultjs/deploy/utils'
-
-task('my-recipe:build', async ({ host }) => {
-  const node = host.bin?.node ?? 'node'
-  await ssh(host, `${node} my-script.js`)
 })
 ```
 
@@ -178,7 +151,7 @@ If your recipe could be useful to others, you're welcome to contribute it to the
 
 Open a pull request on [GitHub](https://github.com/catapultjs/deploy) and add your recipe file to the `contrib/` directory.
 
-## TypeScript: extending TaskRegistry
+## TypeScript: extending `TaskRegistry`
 
 To get type-safe task names, extend the `TaskRegistry` interface:
 

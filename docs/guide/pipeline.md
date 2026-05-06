@@ -12,34 +12,33 @@ The pipeline is the ordered sequence of tasks executed on each server during a d
 
 ## Default pipeline
 
-| Task                  | Description                                                        |
-| --------------------- | ------------------------------------------------------------------ |
-| `deploy:lock`         | Creates a lock file to prevent concurrent deployments              |
-| `deploy:release`      | Creates the release directory                                      |
-| `deploy:update_code`  | Transfers code to the server (overridden by recipe)                |
-| `deploy:shared`       | Symlinks `shared_dirs` and `shared_files` into the release         |
-| `deploy:publish`      | Switches the `current` symlink to the new release                  |
-| `deploy:log_revision` | Records the deployment as JSON in `.catapult/revisions.log`        |
-| `deploy:healthcheck`  | Checks that the application is responding                          |
-| `deploy:unlock`       | Removes the lock file (also called on failure)                     |
-| `deploy:cleanup`      | Removes old releases                                               |
-
-`deploy:builder:shared` and `deploy:builder:release` are automatically inserted when `strategy` is `Strategy.REMOTE`.
+| Task                  | Description                                                 |
+| --------------------- | ----------------------------------------------------------- |
+| `deploy:lock`         | Creates a lock file to prevent concurrent deployments       |
+| `deploy:release`      | Creates the release directory                               |
+| `deploy:update_code`  | Transfers code to the server (provided by recipe or custom task) |
+| `deploy:shared`       | Symlinks `shared_dirs` and `shared_files` into the release  |
+| `deploy:publish`      | Switches the `current` symlink to the new release           |
+| `deploy:log_revision` | Records the deployment as JSON in `.catapult/revisions.log` |
+| `deploy:healthcheck`  | Checks that the application is responding                   |
+| `deploy:unlock`       | Removes the lock file (also called on failure)              |
+| `deploy:cleanup`      | Removes old releases                                        |
 
 `deploy:healthcheck` is automatically removed if no host defines a `healthcheck`.
 
-For the complete pipeline per strategy, see [Deployment Modes](/guide/deployment-modes).
+`deploy:update_code` is intentionally empty in the core package. Import a recipe such as `git`, `rsync`, or `astro`, or override the task yourself.
+
+For complete examples with official recipes, see [Deployment Examples](/guide/deployment-examples).
 
 ## Available tasks (not in pipeline by default)
 
-::: v-pre
-These tasks are registered but not inserted into the pipeline. They run in `{{builder_path}}`, which is strategy-aware — `.catapult/builder` for `Strategy.REMOTE`, the release directory for `Strategy.LOCAL`. Add them manually or override their implementation.
+These tasks are registered but not inserted automatically. By default they run in `{{release_path}}`.
 
-| Task              | Default implementation                          | Description                              |
-| ----------------- | ----------------------------------------------- | ---------------------------------------- |
-| `deploy:install`  | `pmInstall()` in `{{builder_path}}`             | Installs dependencies                    |
-| `deploy:build`    | `pm() run build` in `{{builder_path}}`          | Builds the application                   |
-:::
+| Task             | Default implementation                 | Description           |
+| ---------------- | -------------------------------------- | --------------------- |
+| `deploy:install` | `pmInstall()` in `{{release_path}}`    | Installs dependencies |
+| `deploy:build`   | `pm() run build` in `{{release_path}}` | Builds the app        |
+| `deploy:test`    | `pm() run test` in `{{release_path}}`  | Runs tests            |
 
 ```typescript
 import { after } from '@catapultjs/deploy'
@@ -54,7 +53,7 @@ Override the implementation if needed:
 import { task, cd, run } from '@catapultjs/deploy'
 
 task('deploy:build', () => {
-  cd('{{builder_path}}')
+  cd('{{release_path}}')
   run('node ace build')
 })
 ```
@@ -85,15 +84,15 @@ remove('deploy:healthcheck')
 
 ## Checking if a task is in the pipeline
 
-Use `inPipeline()` to conditionally insert a task depending on the active strategy:
+Use `inPipeline()` to attach a task relative to optional pipeline steps:
 
 ```typescript
 import { inPipeline, after } from '@catapultjs/deploy'
 
-if (inPipeline('deploy:builder:release')) {
-  after('deploy:builder:release', 'my:task')
+if (inPipeline('deploy:healthcheck')) {
+  after('deploy:healthcheck', 'notify')
 } else {
-  after('deploy:shared', 'my:task')
+  after('deploy:publish', 'notify')
 }
 ```
 
@@ -164,7 +163,6 @@ Available in `cd()` and `run()`:
 | `{{current_path}}` | `/base/current` |
 | `{{shared_path}}` | `/base/shared` |
 | `{{releases_path}}` | `/base/releases` |
-| `{{builder_path}}` | `/base/.catapult/builder` when `Strategy.REMOTE`, otherwise `/base/releases/<release>` |
 | `{{base_path}}` | `/base` |
 | `{{release}}` | Release name (e.g. `2024-01-15T10-30-00-000Z`) |
 :::

@@ -7,9 +7,13 @@ description: Catapult changelog — release history and notable changes.
 ## 0.6.0
 
 - `Strategy` removed
+- Added `recipes/astro` — runs `astro build` locally, then uploads the generated artifacts to the new release
+- `recipes/git` now clones or resets directly into `releases/<release>` while keeping a bare mirror in `.catapult/repo`
+- `recipes/rsync` now always syncs the contents of the configured source directory into the release, normalises the trailing slash automatically, and keeps `--delete`
+- `recipes/adonisjs` now wires the built-in `deploy:install` and `deploy:build` tasks, with migrations exposed as `ace:*` tasks
 - Added `--config` / `-c` global flag — points to an alternative deploy config file (default: `deploy.ts`)
 
-> Released at *2026-04-26*
+> Released at *2026-05-07*
 
 ## 0.5.0
 

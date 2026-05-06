@@ -57,7 +57,7 @@ npx cata list:releases
 # List the last 10 revisions (branch, commit, author, date)
 npx cata list:revisions
 
-# List registered tasks
+# List registered tasks and the current pipeline
 npx cata list:tasks
 
 # Show the current deployment pipeline
@@ -95,7 +95,7 @@ Edit the generated `deploy.ts` file, or create it manually:
 
 ```typescript
 import { defineConfig } from '@catapultjs/deploy'
-import { Strategy, Verbose } from '@catapultjs/deploy/enums'
+import { PackageManager, Verbose } from '@catapultjs/deploy/enums'
 import '@catapultjs/deploy/recipes/git'
 import '@catapultjs/deploy/recipes/adonisjs'
 import '@catapultjs/deploy/recipes/pm2'
@@ -105,17 +105,15 @@ export default defineConfig({
 
   repository: 'git@github.com:user/myapp.git', // optional, auto-detected from origin
 
-  strategy: Strategy.LOCAL, // Strategy.LOCAL (default) | Strategy.REMOTE
-
-  packageManager: 'pnpm', // auto-detected from lock files if not set
+  packageManager: PackageManager.PNPM, // auto-detected from lock files if not set
 
   hosts: [
     {
       name: 'production',
       ssh: 'deploy@prod.example.com',
       deployPath: '/home/deploy/prod/myapp',
-      branch: 'main',  // required by git recipe
-      healthcheck: {   // optional
+      branch: 'main', // required by the git recipe
+      healthcheck: {
         url: 'http://127.0.0.1:3333/health',
         retries: 10,
         delayMs: 3000,
@@ -125,7 +123,7 @@ export default defineConfig({
       name: 'staging',
       ssh: 'deploy@staging.example.com',
       deployPath: '/home/deploy/staging/myapp',
-      branch: {         // required by git recipe
+      branch: {
         name: 'develop',
         ask: true,
       },
@@ -135,6 +133,12 @@ export default defineConfig({
   verbose: Verbose.NORMAL, // Verbose.SILENT | Verbose.NORMAL | Verbose.TRACE | Verbose.DEBUG
 })
 ```
+
+Catapult does not impose a deployment mode in `defineConfig()`. A recipe or custom task must provide `deploy:update_code`:
+
+- `recipes/git` clones the repository into each release and keeps a mirror in `.catapult/repo`
+- `recipes/rsync` pushes a local directory into the release with rsync
+- `recipes/astro` builds locally and uploads `dist/` with SCP
 
 ## Server structure
 
@@ -152,7 +156,6 @@ After `cata deploy:setup`, the server will have the following structure:
     ...
   .catapult/
     repo/           ← bare git mirror (git recipe)
-    builder/        ← build workspace (Strategy.REMOTE)
     revisions.log   ← JSON deployment history
     deploy.lock     ← present during a deployment
 ```

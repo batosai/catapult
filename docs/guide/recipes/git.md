@@ -10,16 +10,14 @@ description: Clone the repository and log revisions with the Catapult git recipe
 import '@catapultjs/deploy/recipes/git'
 ```
 
-Compatible with `Strategy.INLINE` and `Strategy.REMOTE` only. With `Strategy.LOCAL`, the server never clones the repository — use the default `deploy:update_code` or the rsync recipe to upload your local build output instead.
+`branch` is required on each host. The `repository` is auto-detected from `git remote get-url origin` if not set in `defineConfig`.
 
 **Tasks**
 
-| Task                 | Inserted                    | Description                                                                                                                       |
-| -------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `git:check`          | after `deploy:lock`         | Verifies the branch exists on the remote                                                                                          |
-| `git:update`         | before `deploy:update_code` | Clones a bare mirror of the repository to `.catapult/repo`, or fetches if it already exists                                       |
-| `deploy:update_code` | —                           | Overrides the built-in task — clones from the local mirror into `.catapult/builder` (`Strategy.REMOTE`) or `releases/<release>` (`Strategy.INLINE`) |
+| Task                 | Inserted                    | Description |
+| -------------------- | --------------------------- | ----------- |
+| `git:check`          | after `deploy:lock`         | Verifies the configured branch exists on the remote repository |
+| `git:update`         | before `deploy:update_code` | Clones a bare mirror into `.catapult/repo`, or fetches it if it already exists |
+| `deploy:update_code` | —                           | Overrides the built-in task and clones or fetches the requested branch into `releases/<release>` |
 
-`branch` is required on each host. The `repository` is auto-detected from `git remote get-url origin` if not set in `defineConfig`.
-
-The local mirror at `.catapult/repo` avoids re-cloning from the remote on every deployment — subsequent deploys perform a fast local clone.
+The local mirror at `.catapult/repo` avoids re-cloning from the remote on every deployment. Subsequent deploys fetch the mirror, then clone or reset the release from that local cache.

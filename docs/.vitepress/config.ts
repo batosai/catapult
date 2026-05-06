@@ -52,13 +52,14 @@ export default defineConfig({
               link: '/guide/recipes/',
               collapsed: false,
               items: [
+                { text: 'astro', link: '/guide/recipes/astro' },
                 { text: 'git', link: '/guide/recipes/git' },
                 { text: 'rsync', link: '/guide/recipes/rsync' },
                 { text: 'adonisjs', link: '/guide/recipes/adonisjs' },
                 { text: 'pm2', link: '/guide/recipes/pm2' },
               ],
             },
-            { text: 'Deployment Modes', link: '/guide/deployment-modes' },
+            { text: 'Deployment Examples', link: '/guide/deployment-examples' },
             {
               text: 'Creating a Recipe',
               link: '/guide/creating-recipes',

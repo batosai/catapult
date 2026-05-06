@@ -10,10 +10,10 @@ description: Complete API reference for @catapultjs/deploy — all exported func
 
 All functions are exported from `@catapultjs/deploy`.
 
-Enums (`Strategy`, `PackageManager`, `Verbose`) are available from a dedicated entry point:
+Enums (`PackageManager`, `Verbose`) are available from a dedicated entry point:
 
 ```typescript
-import { Strategy, PackageManager, Verbose } from '@catapultjs/deploy/enums'
+import { PackageManager, Verbose } from '@catapultjs/deploy/enums'
 ```
 
 ## Configuration
@@ -38,33 +38,32 @@ export default defineConfig({
 
 **Options**
 
-| Option            | Type             | Description                                                                                                                                                                                |
-| ----------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `hosts`           | `Host[]`         | List of servers to deploy to                                                                                                                                                               |
-| `keepReleases?`   | `number`         | Number of releases to keep (default: `5`)                                                                                                                                                  |
-| `repository?`     | `string`         | Git repository URL (auto-detected from origin)                                                                                                                                             |
-| `strategy?`       | `Strategy`       | Deployment strategy — controls where install/build steps run (default: `Strategy.LOCAL`). See [Strategies](/guide/pipeline#strategies)                                                     |
-| `packageManager?` | `PackageManager` | Package manager used by `pm()`, `pmInstall()`, `pmInstallProd()` (auto-detected from lock files, defaults to `PackageManager.NPM`)                                                         |
-| `hooks?`          | `Hooks`          | Lifecycle hooks (`beforeDeploy`, `afterDeploy`, …)                                                                                                                                         |
+| Option            | Type             | Description |
+| ----------------- | ---------------- | ----------- |
+| `hosts`           | `Host[]`         | List of servers to deploy to |
+| `keepReleases?`   | `number`         | Number of releases to keep (default: `5`) |
+| `repository?`     | `string`         | Git repository URL (auto-detected from origin) |
+| `packageManager?` | `PackageManager` | Package manager used by `pm()`, `pmInstall()`, `pmInstallProd()` (auto-detected from lock files, defaults to `PackageManager.NPM`) |
+| `hooks?`          | `Hooks`          | Lifecycle hooks (`beforeDeploy`, `afterDeploy`, …) |
 | `verbose?`        | `Verbose`        | Verbosity level: `Verbose.SILENT` nothing, `Verbose.NORMAL` shows task progress, `Verbose.TRACE` also prints SSH commands, `Verbose.DEBUG` also streams stdout (default: `Verbose.NORMAL`) |
 
 **Host options**
 
-| Option         | Type                         | Description                           |
-| -------------- | ---------------------------- | ------------------------------------- |
-| `name`         | `string`                     | Host identifier                       |
-| `ssh`          | `string \| SshConfig`        | SSH connection string or object       |
-| `deployPath`   | `string`                     | Absolute path on the server           |
-| `branch?`      | `string \| BranchWithPrompt` | Branch to deploy                      |
-| `healthcheck?` | `Healthcheck`                | Healthcheck configuration (see below) |
-| `bin?`         | `Record<string, string>`     | Per-host binary path overrides        |
+| Option         | Type                         | Description |
+| -------------- | ---------------------------- | ----------- |
+| `name`         | `string`                     | Host identifier |
+| `ssh`          | `string \| SshConfig`        | SSH connection string or object |
+| `deployPath`   | `string`                     | Absolute path on the server |
+| `branch?`      | `string \| BranchWithPrompt` | Branch to deploy |
+| `healthcheck?` | `Healthcheck`                | Healthcheck configuration |
+| `bin?`         | `Record<string, string>`     | Per-host binary path overrides |
 
 **SshConfig options**
 
-| Option  | Type     | Description              |
-| ------- | -------- | ------------------------ |
-| `user`  | `string` | SSH user                 |
-| `host`  | `string` | SSH host                 |
+| Option  | Type     | Description |
+| ------- | -------- | ----------- |
+| `user`  | `string` | SSH user |
+| `host`  | `string` | SSH host |
 | `port?` | `number` | SSH port (default: `22`) |
 
 ```typescript
@@ -73,9 +72,9 @@ ssh: { user: 'deploy', host: 'example.com', port: 2222 }
 
 **BranchWithPrompt options**
 
-| Option | Type      | Description                                                              |
-| ------ | --------- | ------------------------------------------------------------------------ |
-| `name` | `string`  | Default branch name                                                      |
+| Option | Type      | Description |
+| ------ | --------- | ----------- |
+| `name` | `string`  | Default branch name |
 | `ask`  | `boolean` | Prompt the user to enter a branch name, with `name` as the default value |
 
 ```typescript
@@ -84,10 +83,10 @@ branch: { name: 'develop', ask: true }
 
 **Healthcheck options**
 
-| Option     | Type     | Description                                   |
-| ---------- | -------- | --------------------------------------------- |
-| `url?`     | `string` | URL to check after deployment                 |
-| `retries?` | `number` | Number of attempts before failing             |
+| Option     | Type     | Description |
+| ---------- | -------- | ----------- |
+| `url?`     | `string` | URL to check after deployment |
+| `retries?` | `number` | Number of attempts before failing |
 | `delayMs?` | `number` | Delay between retries in ms (default: `3000`) |
 
 ```typescript
@@ -155,26 +154,25 @@ task('my:build', async ({ host, paths, config, release, logger }) => {
 
 **TaskContext fields**
 
-| Field     | Type     | Description                                        |
-| --------- | -------- | -------------------------------------------------- |
-| `host`    | `Host`   | The host being deployed to                         |
-| `paths`   | `Paths`  | Resolved server paths (see below)                  |
-| `config`  | `Config` | The resolved deploy configuration                  |
+| Field     | Type     | Description |
+| --------- | -------- | ----------- |
+| `host`    | `Host`   | The host being deployed to |
+| `paths`   | `Paths`  | Resolved server paths |
+| `config`  | `Config` | The resolved deploy configuration |
 | `release` | `string` | The release name (e.g. `2024-01-15T10-30-00-000Z`) |
-| `logger`  | `Logger` | Logger instance for output                         |
+| `logger`  | `Logger` | Logger instance for output |
 
 **Paths fields**
 
-| Field        | Value                                |
-| ------------ | ------------------------------------ |
-| `base`       | `{deployPath}`                       |
-| `current`    | `{deployPath}/current`               |
-| `releases`   | `{deployPath}/releases`              |
-| `release`    | `{deployPath}/releases/{release}`    |
-| `shared`     | `{deployPath}/shared`                |
-| `cataConfig` | `{deployPath}/.catapult`             |
-| `repo`       | `{deployPath}/.catapult/repo`        |
-| `builder`    | `{deployPath}/.catapult/builder`     |
+| Field        | Value |
+| ------------ | ----- |
+| `base`       | `{deployPath}` |
+| `current`    | `{deployPath}/current` |
+| `releases`   | `{deployPath}/releases` |
+| `release`    | `{deployPath}/releases/{release}` |
+| `shared`     | `{deployPath}/shared` |
+| `cataConfig` | `{deployPath}/.catapult` |
+| `repo`       | `{deployPath}/.catapult/repo` |
 | `lock`       | `{deployPath}/.catapult/deploy.lock` |
 
 ---
@@ -236,8 +234,8 @@ Per-host binary paths are configured in `defineConfig`:
 Executes a shell command on the local machine. Flushes any queued `run()` commands first.
 Prints the command at `Verbose.TRACE` level and streams stdout at `Verbose.DEBUG` level.
 
-| Option | Type     | Description                                                     |
-| ------ | -------- | --------------------------------------------------------------- |
+| Option | Type     | Description |
+| ------ | -------- | ----------- |
 | `cwd?` | `string` | Working directory for the command (defaults to `process.cwd()`) |
 
 ```typescript
@@ -363,10 +361,10 @@ remove('deploy:log_revision')
 Returns `true` if the task is present in the current pipeline.
 
 ```typescript
-if (inPipeline('deploy:builder:release')) {
-  after('deploy:builder:release', 'my:task')
+if (inPipeline('deploy:healthcheck')) {
+  after('deploy:healthcheck', 'notify')
 } else {
-  after('deploy:shared', 'my:task')
+  after('deploy:publish', 'notify')
 }
 ```
 
@@ -405,37 +403,27 @@ onStatus(async (_ctx, host, logger) => {
 
 ---
 
-### `onConfig(fn)`
-
-Registers a callback that runs synchronously inside `defineConfig()`, after the pipeline has been adjusted for the active strategy. Use it to insert tasks conditionally based on the strategy or pipeline state.
-
-The callback receives the resolved `Config` as its argument.
-
-```typescript
-import { onConfig, after } from '@catapultjs/deploy'
-import { Strategy } from '@catapultjs/deploy/enums'
-
-onConfig((config) => {
-  if (config.strategy === Strategy.REMOTE) {
-    after('deploy:builder:release', 'my-recipe:install:production')
-  }
-})
-```
-
----
-
 ## Store
 
 Key/value store for sharing configuration between `deploy.ts` and recipes.
 
-**Reserved keys**
+**Core keys**
 
-| Key             | Type       | Default   | Used by                                                                              |
-| --------------- | ---------- | --------- | ------------------------------------------------------------------------------------ |
-| `shared_dirs`   | `string[]` | `[]`      | `deploy:shared`, `deploy:builder:shared`                                               |
-| `shared_files`  | `string[]` | `[]`      | `deploy:shared`, `deploy:builder:shared`                                               |
-| `writable_dirs` | `string[]` | `[]`      | `deploy:setup` (via `onSetup`)                                                       |
-| `build_output`  | `string`   | `'build'` | `deploy:builder:release` — subdirectory to copy from the build directory into the release |
+| Key             | Type       | Default | Used by |
+| --------------- | ---------- | ------- | ------- |
+| `shared_dirs`   | `string[]` | `[]`    | `deploy:shared` |
+| `shared_files`  | `string[]` | `[]`    | `deploy:shared`, `deploy:setup` |
+| `writable_dirs` | `string[]` | `[]`    | `deploy:setup` |
+
+**Recipe keys**
+
+| Key                 | Type                              | Default        | Used by |
+| ------------------- | --------------------------------- | -------------- | ------- |
+| `adonisjs_path`     | `string`                          | `''`           | `recipes/adonisjs` |
+| `astro_mode`        | `string \| Record<string, string>` | `'production'` | `recipes/astro` |
+| `source_path`       | `string`                          | depends recipe | `recipes/astro`, `recipes/rsync` |
+| `rsync_source_path` | `string`                          | `./`           | `recipes/rsync` |
+| `rsync_excludes`    | `string[]`                        | `[]`           | `recipes/rsync` |
 
 ### `set(key, value)`
 
@@ -463,12 +451,12 @@ const dirs = get<string[]>('shared_dirs', [])
 
 ### `has(key)`
 
-Returns `true` if the key is set in the store.
+Returns `true` if the key is set.
 
 ```typescript
 import { has } from '@catapultjs/deploy'
 
-if (has('build_output')) {
+if (has('source_path')) {
   // ...
 }
 ```
@@ -491,12 +479,12 @@ run(`${pm()} run build`)
 
 Returns the install command with frozen lockfile for the current package manager.
 
-| `packageManager` | Command                          |
-| ---------------- | -------------------------------- |
-| `npm`            | `npm ci`                         |
+| `packageManager` | Command |
+| ---------------- | ------- |
+| `npm`            | `npm ci` |
 | `pnpm`           | `pnpm install --frozen-lockfile` |
 | `yarn`           | `yarn install --frozen-lockfile` |
-| `bun`            | `bun ci`                         |
+| `bun`            | `bun ci` |
 
 ```typescript
 run(pmInstall())
@@ -508,12 +496,12 @@ run(pmInstall())
 
 Returns the production-only install command for the current package manager.
 
-| `packageManager` | Command                                       |
-| ---------------- | --------------------------------------------- |
-| `npm`            | `npm ci --omit=dev`                           |
-| `pnpm`           | `pnpm install --frozen-lockfile --prod`       |
+| `packageManager` | Command |
+| ---------------- | ------- |
+| `npm`            | `npm ci --omit=dev` |
+| `pnpm`           | `pnpm install --frozen-lockfile --prod` |
 | `yarn`           | `yarn install --frozen-lockfile --production` |
-| `bun`            | `bun ci --omit=dev`                           |
+| `bun`            | `bun ci --omit=dev` |
 
 ```typescript
 run(pmInstallProd())
@@ -532,9 +520,6 @@ Available in `cd()` and `run()`:
 | `{{current_path}}` | `/base/current` |
 | `{{shared_path}}` | `/base/shared` |
 | `{{releases_path}}` | `/base/releases` |
-| `{{builder_path}}` | `/base/.catapult/builder` when `Strategy.REMOTE`, otherwise `/base/releases/<release>` |
 | `{{base_path}}` | `/base` |
 | `{{release}}` | Release name (e.g. `2024-01-15T10-30-00-000Z`) |
 :::
-
-Where `/base` is the `deployPath` defined on the host.
