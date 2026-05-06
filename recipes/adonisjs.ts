@@ -1,6 +1,6 @@
 import type {} from '../src/types.ts'
 import { task, desc, cd, run, after, before, bin, get, set } from '../index.ts'
-import { getPackageLockFileName } from '../src/utils.ts'
+import { linkSharedPaths } from '../src/actions.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
@@ -27,12 +27,11 @@ const ace =
 desc('Builds the AdonisJS application')
 task('deploy:build', async () => {
   const adonisjsPath = get<string>('adonisjs_path')
-  const lockFile = await getPackageLockFileName(adonisjsPath)
   cd(`{{release_path}}/${adonisjsPath}`)
   run(`${bin('node')} ace build`)
-  run(`cp package.json ./build`)
-  run(`cp ${lockFile} ./build`)
   run(`mkdir ./build/tmp`)
+
+  linkSharedPaths(`{{release_path}}/${adonisjsPath}/build`)
 })
 
 // desc('Builds the AdonisJS application locally')

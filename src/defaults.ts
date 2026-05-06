@@ -4,7 +4,7 @@ import { type TaskContext, task, desc, cd, run, isVerbose } from './task.ts'
 import { pm, pmInstall } from './package_manager.ts'
 import { initPipeline as setPipeline } from './pipeline.ts'
 import { Verbose } from './enums.ts'
-import { get } from './store.ts'
+import { linkSharedPaths } from './actions.ts'
 
 declare module './types.ts' {
   interface TaskRegistry {
@@ -70,20 +70,7 @@ task('deploy:update_code', () => {})
 
 desc('Symlinks shared directories and files into the release')
 task('deploy:shared', () => {
-  const dirs: string[] = get('shared_dirs', [])
-  const files: string[] = get('shared_files', [])
-
-  for (const dir of dirs) {
-    const d = dir.replace(/^\//, '')
-    run(`rm -rf {{release_path}}/${d}`)
-    run(`ln -sfn {{shared_path}}/${d} {{release_path}}/${d}`)
-  }
-
-  for (const file of files) {
-    const f = file.replace(/^\//, '')
-    run(`rm -f {{release_path}}/${f}`)
-    run(`ln -sfn {{shared_path}}/${f} {{release_path}}/${f}`)
-  }
+  linkSharedPaths('{{release_path}}')
 })
 
 desc('Switches current symlink to the new release')
