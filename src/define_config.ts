@@ -7,7 +7,7 @@ import './defaults.ts'
 
 const initialConfigValues = {
   keepReleases: 5,
-  verbose: Verbose.NORMAL,
+  verbose: Verbose.TRACE,
 }
 
 export function defineConfig(config: Config): () => Promise<void> {

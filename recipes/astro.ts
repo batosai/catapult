@@ -11,7 +11,7 @@ task('deploy:build', async ({ host }: TaskContext) => {
 
 desc('Uploads local artifacts to the release directory')
 task('deploy:update_code', async ({ paths }: TaskContext) => {
-  const source = get('source_path', './dist').replace(/\/?$/, '/')
+  const source = get('source_path', './dist/.')
   await upload(source, paths.release)
 })
 

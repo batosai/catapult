@@ -1,6 +1,6 @@
 import { test } from '@japa/runner'
 import { Context } from '../src/context.ts'
-import { pm, pmInstall, pmInstallProd } from '../src/package_manager.ts'
+import { pm, pmExec, pmInstall, pmInstallProd } from '../src/package_manager.ts'
 import type { Config } from '../src/types.ts'
 import { PackageManager } from '../src/enums.ts'
 
@@ -28,6 +28,11 @@ test.group('package_manager', (group) => {
   test('pm() returns yarn when set', ({ assert }) => {
     setManager(PackageManager.YARN)
     assert.equal(pm(), 'yarn')
+  })
+
+  test('pm() returns bun when set', ({ assert }) => {
+    setManager(PackageManager.BUN)
+    assert.equal(pm(), 'bun')
   })
 
   test('pmInstall() returns npm ci for npm', ({ assert }) => {
@@ -60,5 +65,25 @@ test.group('package_manager', (group) => {
   }) => {
     setManager(PackageManager.YARN)
     assert.equal(pmInstallProd(), 'yarn install --frozen-lockfile --production')
+  })
+
+  test('pmExec() returns npm exec for npm', ({ assert }) => {
+    setManager(PackageManager.NPM)
+    assert.equal(pmExec('nuxt build'), 'npm exec -- nuxt build')
+  })
+
+  test('pmExec() returns pnpm exec for pnpm', ({ assert }) => {
+    setManager(PackageManager.PNPM)
+    assert.equal(pmExec('nuxt build'), 'pnpm exec nuxt build')
+  })
+
+  test('pmExec() returns yarn exec for yarn', ({ assert }) => {
+    setManager(PackageManager.YARN)
+    assert.equal(pmExec('nuxt build'), 'yarn exec nuxt build')
+  })
+
+  test('pmExec() returns bun x for bun', ({ assert }) => {
+    setManager(PackageManager.BUN)
+    assert.equal(pmExec('nuxt build'), 'bun x nuxt build')
   })
 })

@@ -10,7 +10,7 @@ task('deploy:build', async () => {
 
 desc('Uploads local artifacts to the release directory')
 task('deploy:update_code', async ({ paths }: TaskContext) => {
-  const vitepressPath = get<string>('vitepress_path') + '.vitepress/dist'
+  const vitepressPath = get<string>('vitepress_path') + '.vitepress/dist/.'
   await upload(vitepressPath, paths.release)
 })
 

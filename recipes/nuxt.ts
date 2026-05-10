@@ -1,5 +1,5 @@
 import type {} from '../src/types.ts'
-import { task, desc, run, get, set, cd } from '../index.ts'
+import { task, desc, run, get, set, cd, after, pmExec } from '../index.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
@@ -14,12 +14,15 @@ desc('Builds the Nuxt app')
 task('deploy:build', () => {
   const nuxtPath = get<string>('nuxt_path')
   cd(`{{release_path}}/${nuxtPath}`)
-  run(`nuxt build`)
+  run(`${pmExec('nuxt')} build`)
 })
 
 desc('Generates the Nuxt static files')
 task('nuxt:generate', () => {
   const nuxtPath = get<string>('nuxt_path')
   cd(`{{release_path}}/${nuxtPath}`)
-  run(`nuxt generate`)
+  run(`${pmExec('nuxt')} generate`)
 })
+
+after('deploy:update_code', 'deploy:install')
+after('deploy:shared', 'deploy:build')

@@ -1,5 +1,5 @@
 import type {} from '../src/types.ts'
-import { task, desc, run, get, set, cd } from '../index.ts'
+import { task, desc, run, get, set, cd, pmExec } from '../index.ts'
 
 declare module '../src/types.ts' {
   interface TaskRegistry {
@@ -19,7 +19,7 @@ desc('Migrates the Directus database')
 task('directus:database:migrate', () => {
   const directusPath = get<string>('directus_path')
   cd(`{{release_path}}/${directusPath}`)
-  run(`directus database migrate:latest`)
+  run(`${pmExec('directus')} database migrate:latest`)
 })
 
 desc('Creates a snapshot of the Directus schema')
@@ -27,7 +27,7 @@ task('directus:snapshot:create', () => {
   const directusPath = get<string>('directus_path')
   const snapshotPath = get<string>('directus_snapshot_path')
   cd(`{{release_path}}/${directusPath}`)
-  run(`directus schema snapshot ${snapshotPath}`)
+  run(`${pmExec('directus')} schema snapshot ${snapshotPath}`)
 })
 
 desc('Applies the Directus schema snapshot')
@@ -35,5 +35,5 @@ task('directus:snapshot:apply', () => {
   const directusPath = get<string>('directus_path')
   const snapshotPath = get<string>('directus_snapshot_path')
   cd(`{{release_path}}/${directusPath}`)
-  run(`directus schema apply -y ${snapshotPath}`)
+  run(`${pmExec('directus')} schema apply -y ${snapshotPath}`)
 })
