@@ -1,3 +1,8 @@
+/**
+ * TYPE: local-build
+ * DESCRIPTION:
+ * This recipe builds a local project then transfers files to a remote server using scp.
+ */
 import { type TaskContext, task, desc, local, upload, get, set, before } from '../index.ts'
 
 set('vitepress_path', get('source_path', ''))

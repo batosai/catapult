@@ -1,3 +1,8 @@
+/**
+ * TYPE: remote-build
+ * DESCRIPTION:
+ * This recipe builds and deploys an AdonisJS app directly on the remote server.
+ */
 import type {} from '../src/types.ts'
 import { task, desc, run, get, set, cd, after, pmExec } from '../index.ts'
 
