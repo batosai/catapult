@@ -4,6 +4,7 @@
 
 - Use Conventional Commits
 - Format the title as `type(scope): summary`
+- Start the summary with a lowercase letter, for example `chore: add xxxxx`
 - Keep the title concise and under 72 characters
 - Use the imperative mood
 - Do not end the title with a period
