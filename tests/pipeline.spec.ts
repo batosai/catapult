@@ -41,6 +41,11 @@ test.group('pipeline', (group) => {
     assert.deepEqual(getPipeline(), ['deploy:release', 'deploy:publish'])
   })
 
+  test('setPipeline deduplicates tasks while preserving last occurrence order', ({ assert }) => {
+    setPipeline(['deploy:release', 'deploy:publish', 'deploy:release'])
+    assert.deepEqual(getPipeline(), ['deploy:publish', 'deploy:release'])
+  })
+
   test('before inserts a task before an existing one', ({ assert }) => {
     before('deploy:publish', 'my:task')
     const pipeline = getPipeline()
@@ -53,6 +58,14 @@ test.group('pipeline', (group) => {
     assert.throws(() => before('nonexistent:task', 'my:task'), /not found in pipeline/)
   })
 
+  test('before moves an existing task to the new position', ({ assert }) => {
+    before('deploy:publish', 'deploy:install')
+    const pipeline = getPipeline()
+    const idx = pipeline.indexOf('deploy:install')
+    assert.equal(pipeline.filter((task) => task === 'deploy:install').length, 1)
+    assert.equal(pipeline[idx + 1], 'deploy:publish')
+  })
+
   test('after inserts a task after an existing one', ({ assert }) => {
     after('deploy:publish', 'my:task')
     const pipeline = getPipeline()
@@ -63,6 +76,14 @@ test.group('pipeline', (group) => {
 
   test('after throws when the reference task does not exist', ({ assert }) => {
     assert.throws(() => after('nonexistent:task', 'my:task'), /not found in pipeline/)
+  })
+
+  test('after moves an existing task to the new position', ({ assert }) => {
+    after('deploy:publish', 'deploy:shared')
+    const pipeline = getPipeline()
+    const idx = pipeline.indexOf('deploy:shared')
+    assert.equal(pipeline.filter((task) => task === 'deploy:shared').length, 1)
+    assert.equal(pipeline[idx - 1], 'deploy:publish')
   })
 
   test('remove removes a task from the pipeline', ({ assert }) => {
