@@ -65,6 +65,7 @@ export default defineConfig({
                 { text: 'vitepress', link: '/guide/recipes/vitepress' },
               ],
             },
+            { text: 'CI/CD', link: '/guide/ci-cd' },
             { text: 'Deployment Examples', link: '/guide/deployment-examples' },
             {
               text: 'Creating a Recipe',
